@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 export default function NavBar() {
   return (
@@ -20,8 +21,8 @@ export default function NavBar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <Link className="btn btn-outline-light" to="/">
-          Add Character
+        <Link className="btn btn-outline-light" to="/addCharacter">
+          Create New Character
         </Link>
       </div>
     </nav>
