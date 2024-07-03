@@ -7,7 +7,12 @@ export default function ViewGameChar() {
     const [gameChar, setGameChar] = useState({
         player: "",
         name: "",
-        novaName: ""
+        novaName: "",
+        concept: "",
+        nature: "",
+        allegiance: "",
+        description: "",
+        experiencePoints: 0
     });
 
     const { id } = useParams();
@@ -40,6 +45,26 @@ export default function ViewGameChar() {
                                 <li className='list-group-item'>
                                     <b>Nova Name: </b>
                                     {gameChar.novaName}
+                                </li>
+                                <li className='list-group-item'>
+                                    <b>Concept: </b>
+                                    {gameChar.concept}
+                                </li>
+                                <li className='list-group-item'>
+                                    <b>Nature: </b>
+                                    {gameChar.nature}
+                                </li>
+                                <li className='list-group-item'>
+                                    <b>Allegiance: </b>
+                                    {gameChar.allegiance}
+                                </li>
+                                <li className='list-group-item'>
+                                    <b>Description: </b>
+                                    {gameChar.description}
+                                </li>
+                                <li className='list-group-item'>
+                                    <b>Experience Points: </b>
+                                    {gameChar.experiencePoints}
                                 </li>
                             </ul>
                         </div>
