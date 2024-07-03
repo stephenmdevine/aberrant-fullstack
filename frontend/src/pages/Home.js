@@ -4,16 +4,21 @@ import { Link } from 'react-router-dom';
 
 export default function Home() {
 
-    const [gameChars, setGameChars] = useState([]);
+  const [gameChars, setGameChars] = useState([]);
 
-    useEffect(() => {
-        loadGameChars();
-    }, []);
+  useEffect(() => {
+    loadGameChars();
+  }, []);
 
-    const loadGameChars = async () => {
-        const result = await axios.get("http://localhost:8080/characters");
-        setGameChars(result.data);
-    }
+  const loadGameChars = async () => {
+    const result = await axios.get("http://localhost:8080/characters");
+    setGameChars(result.data);
+  };
+
+  const deleteGameChar = async (id) => {
+    await axios.delete(`http://localhost:8080/character/${id}`);
+    loadGameChars();
+  };
 
   return (
     <div className="container">
@@ -27,13 +32,16 @@ export default function Home() {
               <th scope="col">Baseline Creation</th>
               <th scope="col">Nova Creation</th>
               <th scope="col">Character Advancement</th>
+              <th scope="col">Delete</th>
             </tr>
           </thead>
           <tbody>
             {gameChars.map((gameChar, index) => (
               <tr>
                 <td>{gameChar.player}</td>
-                <td>{gameChar.name}</td>
+                <td>
+                  <Link to={`/editCharacter/${gameChar.id}`}>{gameChar.name}</Link>
+                </td>
                 <td>
                   <Link className='btn btn-primary mx-1' to={`/`}>Attributes</Link>
                   <Link className='btn btn-primary mx-1' to={`/`}>Abilities</Link>
@@ -44,8 +52,11 @@ export default function Home() {
                   <Link className='btn btn-primary mx-1' to={'/'}>Nova Points</Link>
                 </td>
                 <td>
-                  <Link className='btn btn-primary mx-1' to={'/'}>View Character</Link>
+                  <Link className='btn btn-primary mx-1' to={`/viewCharacter/${gameChar.id}`}>View Character</Link>
                   <Link className='btn btn-primary mx-1' to={'/'}>Spend Experience</Link>
+                </td>
+                <td>
+                  <button className='btn btn-danger mx-1' onClick={() => deleteGameChar(gameChar.id)}>Delete</button>
                 </td>
               </tr>
             ))}
