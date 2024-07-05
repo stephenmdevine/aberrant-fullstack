@@ -43,7 +43,7 @@ export default function Home() {
                   <Link to={`/editCharacter/${gameChar.id}`}>{gameChar.name}</Link>
                 </td>
                 <td>
-                  <Link className='btn btn-primary mx-1' to={`/`}>Attributes</Link>
+                  <Link className='btn btn-primary mx-1' to={`/addAttributes/${gameChar.id}`}>Attributes</Link>
                   <Link className='btn btn-primary mx-1' to={`/`}>Abilities</Link>
                   <Link className='btn btn-primary mx-1' to={`/`}>Backgrounds</Link>
                   <Link className='btn btn-primary mx-1' to={`/`}>Bonus Points</Link>

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AddGameChar from './characters/AddGameChar';
 import EditGameChar from './characters/EditGameChar';
 import ViewGameChar from './characters/ViewGameChar';
+import AddAttributes from './characters/AddAttributes';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route exact path='/addCharacter' element={<AddGameChar />} />
           <Route exact path='/editCharacter/:id' element={<EditGameChar />} />
           <Route exact path='/viewCharacter/:id' element={<ViewGameChar />} />
+          <Route exact path='/addAttributes/:id' element={<AddAttributes />} />
         </Routes>
       </Router>
     </div>
