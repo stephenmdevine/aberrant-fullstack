@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom';
+import ViewAttributes from './components/ViewAttributes';
 
 export default function ViewGameChar() {
 
@@ -69,6 +70,7 @@ export default function ViewGameChar() {
                             </ul>
                         </div>
                     </div>
+                    <ViewAttributes />
                     <Link className='btn btn-primary my-2' to={'/'}>Back to Home</Link>
                 </div>
             </div>

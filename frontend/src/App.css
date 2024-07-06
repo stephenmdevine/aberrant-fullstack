@@ -36,3 +36,10 @@
     transform: rotate(360deg);
   }
 }
+
+.attribute-card {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
