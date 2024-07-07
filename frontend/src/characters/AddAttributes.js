@@ -46,7 +46,7 @@ export default function AddAttributes() {
 
   const handleSubmit = async () => {
     try {
-      const response = await axios.post(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes });
+      const response = await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes });
       console.log('Update successful: ', response.data);
       alert("Attributes successfully updated");
       navigate('/');

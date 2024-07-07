@@ -29,7 +29,7 @@ export default function ViewAttributes() {
     };
 
     return (
-        <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
+        <div className='col-md-12 border rounded p-4 mt-2 shadow'>
             <Container>
                 <Row>
                     <Col sm={4}>
@@ -49,7 +49,7 @@ export default function ViewAttributes() {
                         <Col key={index} sm={4}>
                             <div className="attribute-card">
                                 <h5>{attribute.name}</h5>
-                                <p>{attribute.value}</p>
+                                <h3><b>{attribute.value}</b></h3>
                             </div>
                         </Col>
                     ))}
