@@ -2,6 +2,24 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import SymbolDisplay from './SymbolDisplay';
+
+const CharacterAttributes = ({ attributes }) => {
+    return (
+        <div className='container'>
+            {attributes.map((attribute, index) => (
+                <div className='row mb-2' key={index}>
+                    <div className='col-6 text-left'>
+                        <strong>{attribute.name}: </strong>
+                    </div>
+                    <div className='col-6'>
+                        <SymbolDisplay value={attribute.value} />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
 
 export default function ViewAttributes() {
 
@@ -29,8 +47,10 @@ export default function ViewAttributes() {
     };
 
     return (
-        <div className='col-md-12 border rounded p-4 mt-2 shadow'>
-            <Container>
+        <div className='col-md-6 border rounded p-4 mt-2 shadow'>
+            <h3>Attributes</h3>
+            <CharacterAttributes attributes={attributes} />
+            {/* <Container>
                 <Row>
                     <Col sm={4}>
                         <h4>Physical</h4>
@@ -54,7 +74,7 @@ export default function ViewAttributes() {
                         </Col>
                     ))}
                 </Row>
-            </Container>
+            </Container> */}
         </div>
     );
 }
