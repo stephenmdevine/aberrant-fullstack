@@ -7,6 +7,7 @@ import AddGameChar from './characters/AddGameChar';
 import EditGameChar from './characters/EditGameChar';
 import ViewGameChar from './characters/ViewGameChar';
 import AddAttributes from './characters/AddAttributes';
+import AddAbilities from './characters/AddAbilities';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route exact path='/editCharacter/:id' element={<EditGameChar />} />
           <Route exact path='/viewCharacter/:id' element={<ViewGameChar />} />
           <Route exact path='/addAttributes/:id' element={<AddAttributes />} />
+          <Route exact path='/addAbilities/:id' element={<AddAbilities />} />
         </Routes>
       </Router>
     </div>
