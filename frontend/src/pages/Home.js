@@ -45,7 +45,7 @@ export default function Home() {
                 <td>
                   <Link className='btn btn-primary mx-1' to={`/addAttributes/${gameChar.id}`}>Attributes</Link>
                   <Link className='btn btn-primary mx-1' to={`/addAbilities/${gameChar.id}`}>Abilities</Link>
-                  <Link className='btn btn-primary mx-1' to={`/`}>Backgrounds</Link>
+                  <Link className='btn btn-primary mx-1' to={`/addBackgrounds/${gameChar.id}`}>Backgrounds</Link>
                   <Link className='btn btn-primary mx-1' to={`/`}>Bonus Points</Link>
                 </td>
                 <td>

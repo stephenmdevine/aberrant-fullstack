@@ -44,9 +44,17 @@ export default function AddAbilities() {
     setAbilities(newAbilities);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const abilityDTOs = abilities.map(ability => ({
+      name: ability.name,
+      value: ability.value,
+      associatedAttribute: ability.associatedAttribute
+    }));
+
     try {
-      const response = await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities });
+      const response = await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: abilityDTOs });
       console.log('Update successful: ', response.data);
       alert("Abilities successfully updated");
       navigate('/');
