@@ -24,8 +24,14 @@ export default function AddBackgrounds() {
       { name: "Rank", value: 0 },
       { name: "Resources", value: 0 }
     ]);
+    const [totalPointsSpent, setTotalPointsSpent] = useState(0);
   
     const { id } = useParams();
+
+    useEffect(() => {
+      const total = backgrounds.reduce((acc, background) => acc + background.value, 0);
+      setTotalPointsSpent(total);
+    }, [backgrounds]);
 
     const handleBackgroundChange = (index, newValue) => {
       const newBackgrounds = [...backgrounds];
@@ -48,6 +54,9 @@ export default function AddBackgrounds() {
     <div>
       <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
         <Container>
+        <div className="mb-4">
+          <h3>Total Points Spent: {totalPointsSpent}</h3>
+        </div>
           <Row>
             {backgrounds.map((background, index) => (
               <Col key={index} sm={4}>

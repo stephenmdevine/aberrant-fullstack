@@ -7,17 +7,20 @@ export default function AddAbilities() {
   let navigate = useNavigate();
 
   const [abilities, setAbilities] = useState([]);
-  const [gameChar, setGameChar] = useState([]);
+  const [gameChar, setGameChar] = useState({});
+  const [totalPointsSpent, setTotalPointsSpent] = useState(0);
 
   const { id } = useParams();
 
   useEffect(() => {
     loadAbilities();
+      loadGameChar();
   }, []);
 
   useEffect(() => {
-      loadGameChar();
-  }, []);
+    const total = abilities.reduce((acc, ability) => acc + ability.value, 0);
+    setTotalPointsSpent(total);
+  }, [abilities]);
 
   const loadAbilities = async () => {
     const result = await axios.get(`http://localhost:8080/abilities/${id}`);
@@ -67,6 +70,9 @@ export default function AddAbilities() {
     <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
       <h1 className="text-center my-4">{gameChar.novaName}'s Abilities</h1>
       <form onSubmit={handleSubmit} className='px-5'>
+        <div className="mb-4">
+          <h3>Total Points Spent: {totalPointsSpent}</h3>
+        </div>
         {Object.keys(categorizedAbilities).map(attribute => (
           <div key={attribute} className="mb-4">
             <h3>{attribute}</h3>
