@@ -1,208 +1,150 @@
+import React, { useState } from 'react';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import SymbolDisplay from './components/SymbolDisplay';
 
-export default function AddAttributes() {
+const AddAttributes = () => {
 
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const [selections, setSelections] = useState({ physical: null, mental: null, social: null });
-  const [attributes, setAttributes] = useState([
-    { name: "Strength", value: 1 },
-    { name: "Perception", value: 1 },
-    { name: "Appearance", value: 1 },
-    { name: "Dexterity", value: 1 },
-    { name: "Intelligence", value: 1 },
-    { name: "Manipulation", value: 1 },
-    { name: "Stamina", value: 1 },
-    { name: "Wits", value: 1 },
-    { name: "Charisma", value: 1 }
-  ]);
-  const categories = {
-    physical: ['Strength', 'Dexterity', 'Stamina'],
-    mental: ['Perception', 'Intelligence', 'Wits'],
-    social: ['Appearance', 'Manipulation', 'Charisma']
-  };
-  
-  const options = [3, 5, 7];
+  const [selectedValues, setSelectedValues] = useState({
+    Physical: null,
+    Mental: null,
+    Social: null,
+  });
+
+  const [attributes, setAttributes] = useState({
+    Physical: { Strength: 1, Dexterity: 1, Stamina: 1 },
+    Mental: { Perception: 1, Intelligence: 1, Wits: 1 },
+    Social: { Appearance: 1, Manipulation: 1, Charisma: 1 },
+  });
 
   const { id } = useParams();
 
-  // const [totalPhysicalValue, setTotalPhysicalValue] = useState(0);
-  // const [totalMentalValue, setTotalMentalValue] = useState(0);
-  // const [totalSocialValue, setTotalSocialValue] = useState(0);
-
-  // useEffect(() => {
-  //   const sum = [0, 3, 6].reduce((acc, index) => acc + attributes[index].value, 0);
-  //   setTotalPhysicalValue(sum-3);
-  // }, [attributes]);
-  // useEffect(() => {
-  //   const sum = [1, 4, 7].reduce((acc, index) => acc + attributes[index].value, 0);
-  //   setTotalMentalValue(sum-3);
-  // }, [attributes]);
-  // useEffect(() => {
-  //   const sum = [2, 5, 8].reduce((acc, index) => acc + attributes[index].value, 0);
-  //   setTotalSocialValue(sum-3);
-  // }, [attributes]);
-
-  const handleAttributeChange = (index, newValue) => {
-    const newAttributes = [...attributes];
-    newAttributes[index].value = newValue;
-    setAttributes(newAttributes);
-  };
-
-  const handleSelect = (category, value) => {
-    const newSelections = { ...selections, [category]: value };
-    setSelections(newSelections);
-
-    const newAttributes = { ...attributes };
-    categories[category].forEach(attr => {
-      newAttributes[attr] = { ...newAttributes[attr], additionalPoints: 0 };
-    });
-    setAttributes(newAttributes);
-  };
-
-  const handleInputChange = (category, attribute, value) => {
-    const newValue = parseInt(value, 10) || 0;
-    const newAttributes = { ...attributes };
-    const sum = categories[category].reduce((acc, attr) => acc + newAttributes[attr].additionalPoints, 0) + newValue - newAttributes[attribute].additionalPoints;
-
-    if (sum <= selections[category]) {
-      newAttributes[attribute].additionalPoints = newValue;
-      setAttributes(newAttributes);
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    const updatedAttributes = Object.keys(attributes).map(key => ({
-      name: key,
-      value: attributes[key].baseValue + attributes[key].additionalPoints
+  const handleDropdownChange = (category, value) => {
+    setSelectedValues((prev) => ({
+      ...prev,
+      [category]: value,
     }));
+  };
+
+  const handleAttributeChange = (category, attribute, value) => {
+    setAttributes((prev) => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [attribute]: value,
+      },
+    }));
+  };
+  
+  const getAvailableOptions = (currentCategory) => {
+    const allValues = [3, 5, 7];
+    const selected = Object.entries(selectedValues)
+      .filter(([category, val]) => category !== currentCategory && val !== null)
+      .map(([, val]) => val);
+    return allValues.filter((val) => !selected.includes(val));
+  };
+
+  const renderDropdown = (category) => {
+    const availableOptions = getAvailableOptions(category);
+    return (
+      <select
+        className="form-select"
+        value={selectedValues[category] || ''}
+        onChange={(e) => handleDropdownChange(category, e.target.value ? parseInt(e.target.value) : null)}
+      >
+        <option value="">Select value</option>
+        {availableOptions.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    );
+  };
+
+  const renderAttributes = (category) => {
+    const totalValue = selectedValues[category] || 0;
+    const remainingValue = totalValue - Object.values(attributes[category]).reduce((a, b) => a + b, 0) + 3;
+
+    return Object.keys(attributes[category]).map((attribute) => (
+      <div className='container'>
+        <div className='row'>
+          <div className='d-flex justify-content-center'>
+            <ul className='list-group'>
+              <li key={attribute} className='list-group-item'>
+                <div className='row'>
+                  <label className="col-md-6 text-end"><h5>{attribute}</h5></label>
+                  <div className='col-md-6 text-start'>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={attributes[category][attribute]}
+                      min="1"
+                      max={Math.min(5, remainingValue + attributes[category][attribute])}
+                      onChange={(e) => handleAttributeChange(category, attribute, parseInt(e.target.value))}
+                    />
+                  </div>
+                </div>
+                <SymbolDisplay value={attributes[category][attribute]} />
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    ));
+  };
+
+  const saveAttributes = async () => {
+    const formattedAttributes = Object.entries(attributes).flatMap(([category, attrs]) =>
+      Object.entries(attrs).map(([name, value]) => ({ name, value }))
+    );
 
     try {
-      const response = await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: updatedAttributes });
-      console.log('Update successful: ', response.data);
-      alert("Attributes successfully updated");
+      await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: formattedAttributes });
+      alert('Attributes saved successfully!');
       navigate('/');
     } catch (error) {
-      console.error('Error updating attributes: ', error);
+      console.error('Error saving attributes:', error);
+      alert('Failed to save attributes.');
     }
   };
 
   return (
-    <div className='container mt-5'>
-    <form onSubmit={handleSubmit}>
-      {Object.keys(categories).map(category => (
-        <div key={category} className="mb-4">
-          <div className="row mb-4">
-            <div className="col">
-              <label>Select Value for {category.charAt(0).toUpperCase() + category.slice(1)}</label>
-              <select
-                className="form-select"
-                value={selections[category] || ''}
-                onChange={(e) => handleSelect(category, parseInt(e.target.value))}
-              >
-                <option value="">Select</option>
-                {options.map(option => (
-                  <option
-                    key={option}
-                    value={option}
-                    disabled={Object.values(selections).includes(option) && selections[category] !== option}
-                  >
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {selections[category] && (
-            <div className="row">
-              {categories[category].map(attribute => (
-                <div key={attribute} className="col">
-                  <label>{attribute}</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={attributes[attribute].additionalPoints}
-                    onChange={(e) => handleInputChange(category, attribute, e.target.value)}
-                    min="0"
-                    max={selections[category]}
-                    disabled={!selections[category]}
-                  />
-                  <p>Total: {attributes[attribute].baseValue + attributes[attribute].additionalPoints}</p>
-                </div>
+    <div className="container">
+      <div className='row'>
+        <div className='border rounded p-4 mt-2 shadow'>
+          <div className='d-flex justify-content-center'>
+            <ul className='list-group mb-3'>
+              {['Physical', 'Mental', 'Social'].map((category) => (
+                <li key={category} className='list-group-item'>
+                  <div className='row'>
+                    <div className='col-md-6 text-end'>
+                      <h4>{category}</h4>
+                    </div>
+                    <div className='col-md-2 text-start'>
+                      {renderDropdown(category)}
+                    </div>
+                    <div className='p-2'>
+                      <div>
+                        Points spent: {Object.values(attributes[category]).reduce((a, b) => a + b, 0) - 3}
+                      </div>
+                      <div>
+                        {selectedValues[category] && renderAttributes(category)}
+                      </div>
+                    </div>
+                  </div>
+                </li>
               ))}
-            </div>
-          )}
-
-          {selections[category] && (
-            <div className="row mt-3">
-              <div className="col">
-                <p>
-                  Total Points Allocated: {categories[category].reduce((acc, attr) => acc + attributes[attr].additionalPoints, 0)} / {selections[category]}
-                </p>
-              </div>
-            </div>
-          )}
+            </ul>
+          </div>
+          <button className="btn btn-primary" onClick={saveAttributes}>Save Attributes</button>
+          <Link className='btn btn-outline-danger mx-2' to='/'>Cancel</Link>
         </div>
-      ))}
-      <button className="btn btn-outline-primary" type="submit">Save Attributes</button>
-      <Link className='btn btn-outline-danger mx-2' to='/'>Cancel</Link>
-    </form>
-
-      {/* <div className='col-md-6 offset-md-3 border rounded p-4 mt-2 shadow'>
-        <Container>
-          <Row>
-            <Col sm={4}>
-            <h4>Physical</h4>
-            </Col>
-            <Col sm={4}>
-            <h4>Mental</h4>
-            </Col>
-            <Col sm={4}>
-            <h4>Social</h4>
-            </Col>
-          </Row>
-          <Row>
-            <Col sm={4}>
-            <p>Points Spent: {totalPhysicalValue}</p>
-            </Col>
-            <Col sm={4}>
-            <p>Points Spent: {totalMentalValue}</p>
-            </Col>
-            <Col sm={4}>
-            <p>Points Spent: {totalSocialValue}</p>
-            </Col>
-          </Row>
-        </Container>
-        <Container>
-          <Row>
-            {attributes.map((attribute, index) => (
-              <Col key={index} sm={4}>
-                <div className='attribute-card'>
-                  <h5>{attribute.name}</h5>
-                  <input
-                    className='form-control text-center'
-                    type='number'
-                    min={1}
-                    max={5}
-                    value={attribute.value}
-                    onChange={(e) => handleAttributeChange(index, parseInt(e.target.value))}
-                  />
-                </div>
-              </Col>
-            ))}
-          </Row>
-        </Container>
-
-        <p>Total Points Spent: {totalPhysicalValue + totalMentalValue + totalSocialValue}</p>
-        <button className='btn btn-outline-primary' onClick={handleSubmit}>Save Attributes</button>
-        <Link className='btn btn-outline-danger mx-2' to='/'>Cancel</Link>
-      </div> */}
+      </div>
     </div>
   );
-}
+};
+
+export default AddAttributes;

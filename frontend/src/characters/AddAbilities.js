@@ -71,7 +71,7 @@ export default function AddAbilities() {
       <h1 className="text-center my-4">{gameChar.novaName}'s Abilities</h1>
       <form onSubmit={handleSubmit} className='px-5'>
         <div className="mb-4">
-          <h3>Total Points Spent: {totalPointsSpent}</h3>
+          <h3>Total Points Spent: {totalPointsSpent-6}</h3>
         </div>
         {Object.keys(categorizedAbilities).map(attribute => (
           <div key={attribute} className="mb-4">
