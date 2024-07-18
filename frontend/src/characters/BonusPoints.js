@@ -1,35 +1,36 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { Col, Container, Row } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Container, Row } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
+import SymbolDisplay from './components/SymbolDisplay';
 
 export default function BonusPoints() {
 
-    const [gameChar, setGameChar] = useState(null);
+  const [gameChar, setGameChar] = useState(null);
 
-    const { id } = useParams();
+  const { id } = useParams();
 
-    useEffect(() => {
-        loadGameChar();
-    }, []);
+  useEffect(() => {
+    loadGameChar();
+  }, []);
 
-    const loadGameChar = async () => {
-        const result = await axios.get(`http://localhost:8080/character/${id}`);
-        setGameChar(result.data);
-    };
+  const loadGameChar = async () => {
+    const result = await axios.get(`http://localhost:8080/character/${id}`);
+    setGameChar(result.data);
+  };
 
-    if (!gameChar) {
-      return <div>Loading...</div>;
-    }
+  if (!gameChar) {
+    return <div>Loading...</div>;
+  }
 
-    const attributes = gameChar.attributes;
-    const abilities = gameChar.abilities;
-    const backgrounds = gameChar.backgrounds;
-    const willpower = gameChar.willpower;
-    const quantum = gameChar.quantum;
-    const initiative = gameChar.initiative;
-    const flaws = gameChar.flaws;
-    const merits = gameChar.merits;
+  const attributes = gameChar.attributes;
+  const abilities = gameChar.abilities;
+  const backgrounds = gameChar.backgrounds;
+  const willpower = gameChar.willpower;
+  const quantum = gameChar.quantum;
+  const initiative = gameChar.initiative;
+  const flaws = gameChar.flaws;
+  const merits = gameChar.merits;
 
   return (
     <div className='container'>
@@ -38,66 +39,98 @@ export default function BonusPoints() {
           <Container>
             <h2 className='text-center m-4'>{gameChar.name}: Spend Bonus Points</h2>
           </Container>
-          <Container>
-
-            <Row>
-              <Col sm={4}>
-                <ul className='list-group list-group-flush'>
-                  <li className='list-group-item'></li>
-
-                </ul>
-              </Col>
-            </Row>
-          </Container>
+          <AttributeDisplay gameChar={gameChar} />
 
         </div>
 
       </div>
-        
+
     </div>
   );
 }
 
 const AttributeDisplay = ({ gameChar }) => {
-  const attributes = gameChar.attributes;
-  const attrValues = attributes.map(({ name, value }) => ({ [name]: value }));
-  // const attrAbilities = gameChar.abilities.filter(ability => ability.associatedAttribute === attrName);
+  const [attributes, setAttributes] = useState(gameChar.attributes);
+  const [originalAttributes, setOriginalAttributes] = useState({});
+
+  useEffect(() => {
+    const originalAttrValues = attributes.reduce((acc, attr) => {
+      acc[attr.name] = attr.value;
+      return acc;
+    }, {});
+    setOriginalAttributes(originalAttrValues);
+  }, [attributes]);
+
+  const handleDecrement = async (attribute) => {
+    const originalValue = originalAttributes[attribute.name];
+    const newValue = attribute.value - 1;
+
+    if (newValue < originalValue) {
+      console.log("Cannot reduce below original value");
+      return;
+    }
+
+    try {
+      const response = await axios.put(`http://localhost:8080/decrementAttribute/${gameChar.id}`, { attributeName: attribute.name });
+      console.log('Decrement successful:', response.data);
+      setAttributes(prevAttributes => 
+        prevAttributes.map(attr => 
+          attr.name === attribute.name ? { ...attr, value: newValue } : attr
+        )
+      );
+    } catch (error) {
+      console.error('Error decrementing attribute:', error);
+    }
+  };
+
+  const handleIncrement = async (attribute) => {
+    if (attribute.value >= 5) {
+      console.log('Cannot increment above 5');
+      return;
+    }
+
+    try {
+      const response = await axios.put(`http://localhost:8080/incrementAttribute/${gameChar.id}`, { attributeName: attribute.name });
+      console.log('Increment successful:', response.data);
+      setAttributes(prevAttributes => 
+        prevAttributes.map(attr => 
+          attr.name === attribute.name ? { ...attr, value: attr.value + 1 } : attr
+        )
+      );
+    } catch (error) {
+      console.error('Error incrementing attribute:', error);
+    }
+  };
 
   return (
-      <div className='attribute-section'>
-      <div className='row mb-3'>
+    <div className='attribute-section'>
+      <div className='row'>
         {attributes.map((attribute, index) => (
-          <div>
-            <div className='col-md-6 text-end'>
-              <h3>{attrName} </h3>
+      <Container className='d-flex flex-column align-items-center my-4'>
+        <Row className='w-100'>
+          <Col className='text-center'>
+              <h4>{attribute.name} </h4>
+          </Col>
+        </Row>
+        <Row className='w-100'>
+          <Col className='text-center'>
+            <div className='btn-toolbar justify-content-center' role='toolbar'>
+              <h4 className='me-2'><SymbolDisplay value={attribute.value} /></h4>
+              <ButtonGroup>
+                <Button variant='danger' onClick={() => handleDecrement(attribute)}>
+                  <i className='bi bi-dash-square'></i>
+                </Button>
+                <Button variant='success' onClick={() => handleIncrement(attribute)}>
+                  <i className='bi bi-plus-square'></i>
+                </Button>
+              </ButtonGroup>
             </div>
-            <div className='col-md-6 text-start'>
-              <button className='btn btn-danger'>
-                <span className='bi bi-dash-square'></span>
-              </button>
-              <h3><SymbolDisplay value={attrValue} /></h3>
-              <button className='btn btn-success'>
-                <span className='bi bi-plus-square'></span>
-              </button>
-            </div>
-          </div>
-            ))}
-          </div>
-          <ul className='list-group'>
-              {attrAbilities.map((ability, index) => (
-                  <li key={index} className='list-group-item'>
-                      <div className='row'>
-                          <div className='col-md-6 text-end'>
-                              {ability.name} 
-                          </div>
-                          <div className='col-md-6 text-start'>
-                              <SymbolDisplay value={ability.value}/>
-                          </div>
-                      </div>
-                  </li>
-              ))}
-          </ul>
+          </Col>
+        </Row>
+      </Container>
+        ))}
       </div>
+    </div>
 
   );
 };

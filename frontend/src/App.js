@@ -10,6 +10,7 @@ import ViewGameChar from './characters/ViewGameChar';
 import AddAttributes from './characters/AddAttributes';
 import AddAbilities from './characters/AddAbilities';
 import AddBackgrounds from './characters/components/AddBackgrounds';
+import BonusPoints from './characters/BonusPoints';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route exact path='/addAttributes/:id' element={<AddAttributes />} />
           <Route exact path='/addAbilities/:id' element={<AddAbilities />} />
           <Route exact path='/addBackgrounds/:id' element={<AddBackgrounds />} />
+          <Route exact path='/spendBonusPoints/:id' element={<BonusPoints />} />
         </Routes>
       </Router>
     </div>
