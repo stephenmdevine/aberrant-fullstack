@@ -14,11 +14,16 @@ export default function AddAbilities() {
 
   useEffect(() => {
     loadAbilities();
-      loadGameChar();
+    loadGameChar();
   }, []);
 
   useEffect(() => {
-    const total = abilities.reduce((acc, ability) => acc + ability.value, 0);
+    const total = abilities.reduce((acc, ability) => {
+      if (ability.name === 'Endurance' || ability.name === 'Resistance') {
+        return acc;
+      }
+      return acc + ability.value;
+    }, 0);
     setTotalPointsSpent(total);
   }, [abilities]);
 
@@ -28,8 +33,8 @@ export default function AddAbilities() {
   };
 
   const loadGameChar = async () => {
-      const result = await axios.get(`http://localhost:8080/character/${id}`);
-      setGameChar(result.data);
+    const result = await axios.get(`http://localhost:8080/character/${id}`);
+    setGameChar(result.data);
   };
 
   const categorizedAbilities = abilities.reduce((acc, ability, index) => {
@@ -45,6 +50,16 @@ export default function AddAbilities() {
     const newAbilities = [...abilities];
     newAbilities[index].value = newValue;
     setAbilities(newAbilities);
+  };
+
+  const isDisabled = (value, newValue) => {
+    const pointsSpent = abilities.reduce((acc, ability) => {
+      if (ability.name === 'Endurance' || ability.name === 'Resistance') {
+        return acc;
+      }
+      return acc + ability.value;
+    }, 0);
+    return (totalPointsSpent >= gameChar.abilityPoints && newValue > value);
   };
 
   const handleSubmit = async (e) => {
@@ -71,7 +86,8 @@ export default function AddAbilities() {
       <h1 className="text-center my-4">{gameChar.novaName}'s Abilities</h1>
       <form onSubmit={handleSubmit} className='px-5'>
         <div className="mb-4">
-          <h3>Total Points Spent: {totalPointsSpent-6}</h3>
+          <h3>Total Points Spent: {totalPointsSpent}</h3>
+          <h4>Points Available: {gameChar.abilityPoints - totalPointsSpent}</h4>
         </div>
         {Object.keys(categorizedAbilities).map(attribute => (
           <div key={attribute} className="mb-4">
@@ -86,14 +102,19 @@ export default function AddAbilities() {
                     max={3}
                     className="form-control w-25"
                     value={value}
-                    onChange={(e) => handleAbilityChange(index, parseInt(e.target.value, 10))}
+                    onChange={(e) => {
+                      const newValue = parseInt(e.target.value, 10);
+                      if (!isDisabled(value, newValue)) {
+                        handleAbilityChange(index, newValue);
+                      }
+                    }}
                   />
                 </li>
               ))}
             </ul>
           </div>
         ))}
-        <button className='btn btn-outline-primary' onClick={handleSubmit}>Save Abilities</button>
+        <button className='btn btn-outline-primary' type='submit'>Save Abilities</button>
         <Link className='btn btn-outline-danger mx-2' to='/'>Cancel</Link>
       </form>
     </div>
