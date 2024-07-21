@@ -134,3 +134,9 @@ const AttributeDisplay = ({ gameChar }) => {
 
   );
 };
+
+const BackgroundDisplay = ({gameChar}) => {
+  const [backgrounds, setBackgrounds] = useState(gameChar.backgrounds);
+  const [originalBackgrounds, setOriginalBackgrounds] = useState({});
+
+};
