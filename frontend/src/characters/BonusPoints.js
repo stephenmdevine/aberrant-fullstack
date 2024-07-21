@@ -139,4 +139,12 @@ const BackgroundDisplay = ({gameChar}) => {
   const [backgrounds, setBackgrounds] = useState(gameChar.backgrounds);
   const [originalBackgrounds, setOriginalBackgrounds] = useState({});
 
+  useEffect(() => {
+    const originalBkgrValues = attributes.reduce((acc, attr) => {
+      acc[attr.name] = attr.value;
+      return acc;
+    }, {});
+    setOriginalBackgrounds(originalBkgrValues);
+  }, [backgrounds]);
+
 };
