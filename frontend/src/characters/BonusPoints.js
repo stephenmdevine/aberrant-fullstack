@@ -146,12 +146,11 @@ const BackgroundDisplay = ({gameChar}) => {
 };
 */
 
-import { Button, Col, Container, Row, ButtonGroup } from "react-bootstrap";
-
-const { default: axios } = require("axios");
-const { useState, useEffect } = require("react");
-const { useParams, useNavigate, Link } = require("react-router-dom");
-
+import axios from 'axios';
+import React, { useEffect, useState } from 'react'
+import { Button, ButtonGroup, Col, Container, Row } from 'react-bootstrap';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import SymbolDisplay from './components/SymbolDisplay';
 
 const BonusPoints = () => {
   const [attributes, setAttributes] = useState([]);
@@ -168,8 +167,11 @@ const BonusPoints = () => {
     try {
       const result = await axios.get(`http://localhost:8080/character/${id}`);
       setGameChar(result.data);
+      console.log(gameChar);
       setAttributes(result.data.attributes);
+      console.log(attributes);
       setBonusPoints(result.data.bonusPoints);
+      console.log(bonusPoints);
     } catch (error) {
       console.error('Error loading character:', error);
     }
@@ -234,7 +236,7 @@ const BonusPoints = () => {
                 <Row className="w-100">
                   <Col className="text-center">
                     <div className="btn-toolbar justify-content-center" role="toolbar">
-                      <h4 className="me-2">{attribute.value}</h4>
+                    <h4 className='me-2'><SymbolDisplay value={attribute.value} /></h4>
                       <ButtonGroup>
                         <Button variant="danger" onClick={() => handleDecrement(index)}>
                           <i className="bi bi-dash-square"></i>
@@ -250,7 +252,7 @@ const BonusPoints = () => {
             ))}
           </div>
         </div>
-        <Button className="btn btn-outline-primary" type="submit">Save Attributes</Button>
+        <Button className="btn btn-primary" type="submit">Submit</Button>
         <Link className="btn btn-outline-danger mx-2" to="/">Cancel</Link>
       </form>
     </Container>
