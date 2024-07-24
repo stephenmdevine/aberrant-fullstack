@@ -154,6 +154,8 @@ import SymbolDisplay from './components/SymbolDisplay';
 
 const BonusPoints = () => {
   const [attributes, setAttributes] = useState([]);
+  const [abilities, setAbilities] = useState([]);
+  const [backgrounds, setBackgrounds] = useState([]);
   const [gameChar, setGameChar] = useState({});
   const [bonusPoints, setBonusPoints] = useState(0);
   const { id } = useParams();
@@ -167,11 +169,10 @@ const BonusPoints = () => {
     try {
       const result = await axios.get(`http://localhost:8080/character/${id}`);
       setGameChar(result.data);
-      console.log(gameChar);
       setAttributes(result.data.attributes);
-      console.log(attributes);
+      setAbilities(result.data.abilities);
+      setBackgrounds(result.data.backgrounds);
       setBonusPoints(result.data.bonusPoints);
-      console.log(bonusPoints);
     } catch (error) {
       console.error('Error loading character:', error);
     }
@@ -181,19 +182,25 @@ const BonusPoints = () => {
     return <div>Loading...</div>;
   }
   
-  const handleIncrement = (index) => {
-    if (attributes[index].value < 5 && bonusPoints >= 5) {
+  const handleAttrIncrement = (index) => {
+
+    const attribute = attributes[index];
+    const totalValue = attribute.value + attribute.bonusValue;
+
+    if (totalValue < 5 && bonusPoints >= 5) {
       const newAttributes = [...attributes];
-      newAttributes[index].value += 1;
+      newAttributes[index].bonusValue += 1;
       setAttributes(newAttributes);
       setBonusPoints(bonusPoints - 5);
     }
   };
   
-  const handleDecrement = (index) => {
-    if (attributes[index].value > attributes[index].originalValue) {
+  const handleAttrDecrement = (index) => {
+    const attribute = attributes[index];
+
+    if (attribute.bonusValue > 0) {
       const newAttributes = [...attributes];
-      newAttributes[index].value -= 1;
+      newAttributes[index].bonusValue -= 1;
       setAttributes(newAttributes);
       setBonusPoints(bonusPoints + 5);
     }
@@ -238,10 +245,10 @@ const BonusPoints = () => {
                     <div className="btn-toolbar justify-content-center" role="toolbar">
                     <h4 className='me-2'><SymbolDisplay value={attribute.value} /></h4>
                       <ButtonGroup>
-                        <Button variant="danger" onClick={() => handleDecrement(index)}>
+                        <Button variant="danger" onClick={() => handleAttrDecrement(index)}>
                           <i className="bi bi-dash-square"></i>
                         </Button>
-                        <Button variant="success" onClick={() => handleIncrement(index)}>
+                        <Button variant="success" onClick={() => handleAttrIncrement(index)}>
                           <i className="bi bi-plus-square"></i>
                         </Button>
                       </ButtonGroup>
