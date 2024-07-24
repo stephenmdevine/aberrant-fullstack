@@ -43,3 +43,7 @@
   border-radius: 5px;
   text-align: center;
 }
+
+.small-icon {
+  font-size: 0.75em;
+}

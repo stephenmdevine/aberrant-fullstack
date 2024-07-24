@@ -164,7 +164,7 @@ const BonusPoints = () => {
   useEffect(() => {
     loadGameChar();
   }, []);
-  
+
   const loadGameChar = async () => {
     try {
       const result = await axios.get(`http://localhost:8080/character/${id}`);
@@ -181,7 +181,7 @@ const BonusPoints = () => {
   if (!gameChar) {
     return <div>Loading...</div>;
   }
-  
+
   const handleAttrIncrement = (index) => {
 
     const attribute = attributes[index];
@@ -194,7 +194,20 @@ const BonusPoints = () => {
       setBonusPoints(bonusPoints - 5);
     }
   };
-  
+
+  const handleAbilIncrement = (index) => {
+
+    const ability = abilities[index];
+    const totalValue = ability.value + ability.bonusValue;
+
+    if (totalValue < 5 && bonusPoints >= 2) {
+      const newAbilities = [...abilities];
+      newAbilities[index].bonusValue += 1;
+      setAbilities(newAbilities);
+      setBonusPoints(bonusPoints - 2);
+    }
+  };
+
   const handleAttrDecrement = (index) => {
     const attribute = attributes[index];
 
@@ -205,7 +218,18 @@ const BonusPoints = () => {
       setBonusPoints(bonusPoints + 5);
     }
   };
-  
+
+  const handleAbilDecrement = (index) => {
+    const ability = abilities[index];
+    
+    if (ability.bonusValue > 0) {
+      const newAbilities = [...abilities];
+      newAbilities[index].bonusValue -= 1;
+      setAbilities(newAbilities);
+      setBonusPoints(bonusPoints + 2);
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -225,7 +249,7 @@ const BonusPoints = () => {
       console.error('Error updating attributes:', error);
     }
   };
-  
+
   return (
     <Container>
       <h1 className="text-center my-4">{gameChar.novaName}'s Attributes</h1>
@@ -233,30 +257,63 @@ const BonusPoints = () => {
       <form onSubmit={handleSubmit}>
         <div className="attribute-section">
           <div className="row">
-            {attributes.map((attribute, index) => (
-              <Container key={attribute.name} className="d-flex flex-column align-items-center my-4">
-                <Row className="w-100">
-                  <Col className="text-center">
-                    <h4>{attribute.name}</h4>
-                  </Col>
-                </Row>
-                <Row className="w-100">
-                  <Col className="text-center">
-                    <div className="btn-toolbar justify-content-center" role="toolbar">
-                    <h4 className='me-2'><SymbolDisplay value={attribute.value} /></h4>
-                      <ButtonGroup>
-                        <Button variant="danger" onClick={() => handleAttrDecrement(index)}>
-                          <i className="bi bi-dash-square"></i>
-                        </Button>
-                        <Button variant="success" onClick={() => handleAttrIncrement(index)}>
-                          <i className="bi bi-plus-square"></i>
-                        </Button>
-                      </ButtonGroup>
-                    </div>
-                  </Col>
-                </Row>
-              </Container>
-            ))}
+            {attributes.map((attribute, attrIndex) => {
+              const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attribute.name);
+              return (
+                <Container key={attribute.name} className="d-flex flex-column align-items-center my-4">
+                  <Row className="w-100">
+                    <Col className="text-center">
+                      <h4>{attribute.name}</h4>
+                    </Col>
+                  </Row>
+                  <Row className="w-100">
+                    <Col className="text-center">
+                      <div className="btn-toolbar justify-content-center" role="toolbar">
+                        <h4 className='me-2'><SymbolDisplay value={attribute.value + attribute.bonusValue} /></h4>
+                        <ButtonGroup>
+                          <Button variant="danger" onClick={() => handleAttrDecrement(attrIndex)}>
+                            <i className="bi bi-dash-square"></i>
+                          </Button>
+                          <Button variant="success" onClick={() => handleAttrIncrement(attrIndex)}>
+                            <i className="bi bi-plus-square"></i>
+                          </Button>
+                        </ButtonGroup>
+                      </div>
+                    </Col>
+                    <Row>
+                      <Col className="text-center">
+                        <ul className='list-group'>
+                          {attrAbilities.map((ability, abilIndex) => (
+                            <li key={abilIndex} className='list-group-item'>
+                              <div className='row'>
+                                <div className='col-md-6 text-end'>
+                                  {ability.name}
+                                </div>
+                                <div className='col-md-6 text-start'>
+                                  <span className='me-2'>
+                                  <SymbolDisplay value={ability.value + ability.bonusValue} />
+
+                                  </span>
+                                  <ButtonGroup>
+                                    <Button variant="danger" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
+                                      <i className="bi bi-dash-square"></i>
+                                    </Button>
+                                    <Button variant="success" size='sm' onClick={() => handleAbilIncrement(abilIndex)}>
+                                      <i className="bi bi-plus-square small-icon"></i>
+                                    </Button>
+                                  </ButtonGroup>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </Col>
+                    </Row>
+
+                  </Row>
+                </Container>
+              );
+            })}
           </div>
         </div>
         <Button className="btn btn-primary" type="submit">Submit</Button>
