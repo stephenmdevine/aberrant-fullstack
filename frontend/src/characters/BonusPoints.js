@@ -18,7 +18,7 @@ const BonusPoints = () => {
   
   // Function to get attribute value by name
   const getAttributeValue = (attributeName) => {
-    const attribute = gameChar.attributes.find(attr => attr.name === attributeName);
+    const attribute = attributes.find(attr => attr.name === attributeName);
     return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
   };
   
@@ -255,6 +255,241 @@ const BonusPoints = () => {
 
   return (
     <Container>
+      {/* Fixed Navbar and Header */}
+      <header style={{ position: 'fixed', top: 70, width: '100%', backgroundColor: '#f8f9fa', zIndex: 1 }}>
+        <Container>
+          <Row className="align-items-center py-3">
+            <Col>
+              <h1 className="text-center">{gameChar.novaName}'s Attributes & Abilities</h1>
+            </Col>
+          </Row>
+          <Row className="align-items-center py-2">
+            <Col>
+              <h3 className="text-center">Bonus Points: {bonusPoints}</h3>
+            </Col>
+          </Row>
+        </Container>
+      </header>
+      {/* Main Content */}
+      <main style={{ paddingTop: '150px' }}>
+        <form onSubmit={handleSubmit}>
+          {/* Attributes and Abilities Section */}
+          <section className="attribute-section mb-5">
+            {attributes.map((attribute, attrIndex) => {
+              const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attribute.name);
+              return (
+                <Container key={attribute.name} className="my-4">
+                  <Row>
+                    <Col className="text-center">
+                      <h4>{attribute.name}</h4>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col className="text-center">
+                      <div className="btn-toolbar justify-content-center" role="toolbar">
+                        <h4 className='me-2'><SymbolDisplay value={attribute.value + attribute.bonusValue} /></h4>
+                        <ButtonGroup>
+                          <Button variant="danger" onClick={() => handleAttrDecrement(attrIndex)}>
+                            <i className="bi bi-dash-square"></i>
+                          </Button>
+                          <Button variant="primary" onClick={() => handleAttrIncrement(attrIndex)}>
+                            <i className="bi bi-plus-square"></i>
+                          </Button>
+                        </ButtonGroup>
+                      </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col className="text-center">
+                      <ul className='list-group'>
+                        {attrAbilities.map((ability, abilIndex) => (
+                          <li key={abilIndex} className='list-group-item'>
+                            <div className='row align-items-center'>
+                              <div className='col-md-6 text-end'>
+                                {ability.name}
+                              </div>
+                              <div className='col-md-6 text-start'>
+                                <span className='me-2'>
+                                  <SymbolDisplay value={ability.value + ability.bonusValue} />
+                                </span>
+                                <ButtonGroup>
+                                  <Button variant="danger" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
+                                    <i className="bi bi-dash-square"></i>
+                                  </Button>
+                                  <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(abilIndex)}>
+                                    <i className="bi bi-plus-square"></i>
+                                  </Button>
+                                </ButtonGroup>
+                              </div>
+                            </div>
+                            <div>
+                              <ul className='list-group'>
+                                {ability.specialties.map((specialty, specIndex) => (
+                                  <li key={specIndex} className='list-group-item'>
+                                    <div>
+                                      <span>{specialty.name} <SymbolDisplay value={ability.value + 1} max={6} /></span>
+                                      <Button
+                                        className='ms-2'
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
+                                      >
+                                        x
+                                      </Button>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                              {ability.specialties.length < 3 && (
+                                <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
+                              )}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </Col>
+                  </Row>
+                </Container>
+              );
+            })}
+          </section>
+          {/* Backgrounds Section */}
+          <section className="background-section mb-5">
+            <h1 className="text-center my-4">{gameChar.novaName}'s Backgrounds</h1>
+            <ul className='list-group'>
+              {backgrounds.map((background, bkgrIndex) => (
+                <li key={bkgrIndex} className='list-group-item'>
+                  <div className='row'>
+                    <div className='col-md-6 text-end'>
+                      {background.name}
+                    </div>
+                    <div className='col-md-6 text-start'>
+                      <span className='me-2'>
+                        <SymbolDisplay value={background.value + background.bonusValue} />
+                      </span>
+                      <ButtonGroup>
+                        <Button variant="danger" size='sm' onClick={() => handleBkgrDecrement(bkgrIndex)}>
+                          <i className="bi bi-dash-square"></i>
+                        </Button>
+                        <Button variant="primary" size='sm' onClick={() => handleBkgrIncrement(bkgrIndex)}>
+                          <i className="bi bi-plus-square"></i>
+                        </Button>
+                      </ButtonGroup>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+          {/* Additional Stats Section */}
+          <section className='additional-section'>
+            <h1 className="text-center my-4">{gameChar.novaName}'s Additional Stats</h1>
+            <ul className='list-group'>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Willpower
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-2'>
+                      <SymbolDisplay value={gameChar.willpowerBonus + 3} max={10} />
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={handleWillDecrement}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={handleWillIncrement}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Quantum
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-2'>
+                      <SymbolDisplay value={gameChar.quantumBonus + 1} max={10} />
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={handleQuantDecrement}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={handleQuantIncrement}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Initiative
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-3'>
+                      {initiative}
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={handleInitDecrement}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={handleInitIncrement}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </section>
+          {/* Submit and Cancel Buttons */}
+          <div className="d-flex justify-content-center my-4">
+            <Button className="btn btn-primary me-2" type="submit">Submit</Button>
+            <Link className="btn btn-outline-danger" to="/">Cancel</Link>
+          </div>
+        </form>
+      </main>
+      {/* Specialty Modal */}
+      <Modal show={showSpecialtyModal} onHide={handleSpecialtyModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Specialty</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type='text'
+                name='name'
+                value={newSpecialty.name}
+                onChange={handleSpecialtyInputChange}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant='secondary' onClick={handleSpecialtyModalClose}>
+            Close
+          </Button>
+          <Button variant='primary' onClick={handleSpecialtySubmit}>
+            Add Specialty
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
+  );
+
+};
+
+export default BonusPoints;
+/*
+
+    <Container>
       <h1 className="text-center my-4">{gameChar.novaName}'s Attributes & Abilities</h1>
       <h3>Bonus Points: {bonusPoints}</h3>
       <form onSubmit={handleSubmit}>
@@ -472,8 +707,4 @@ const BonusPoints = () => {
         <Link className="btn btn-outline-danger mx-2" to="/">Cancel</Link>
       </form>
     </Container>
-  );
-
-};
-
-export default BonusPoints;
+*/
