@@ -15,6 +15,17 @@ const BonusPoints = () => {
   const [bonusPoints, setBonusPoints] = useState(0);
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  // Function to get attribute value by name
+  const getAttributeValue = (attributeName) => {
+    const attribute = gameChar.attributes.find(attr => attr.name === attributeName);
+    return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
+  };
+  
+  // Calculate initiative
+  const dexterityValue = getAttributeValue('Dexterity');
+  const witsValue = getAttributeValue('Wits');
+  const initiative = dexterityValue + witsValue + gameChar.initiativeBonus;
 
   useEffect(() => {
     loadGameChar();
@@ -36,10 +47,14 @@ const BonusPoints = () => {
   if (!gameChar) {
     return <div>Loading...</div>;
   }
-  
+
   const handleSpecialtyModalShow = (abilityId) => {
-    setSelectedAbilityId(abilityId);
-    setShowSpecialtyModal(true);
+    if (bonusPoints > 0) {
+      setSelectedAbilityId(abilityId);
+      setShowSpecialtyModal(true);
+    } else {
+      alert('You do not have enough bonus points to add a new specialty.');
+    }
   };
 
   const handleSpecialtyModalClose = () => {
@@ -79,6 +94,51 @@ const BonusPoints = () => {
     }
   };
 
+  const handleBkgrIncrement = (index) => {
+
+    const background = backgrounds[index];
+    const totalValue = background.value + background.bonusValue;
+
+    if (totalValue < 5 && bonusPoints >= 1) {
+      const newBackgrounds = [...backgrounds];
+      newBackgrounds[index].bonusValue += 1;
+      setBackgrounds(newBackgrounds);
+      setBonusPoints(bonusPoints - 1);
+    }
+  };
+
+  const handleWillIncrement = () => {
+    const totalValue = gameChar.willpowerBonus + 3;
+    if (totalValue < 10 && bonusPoints >= 2) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        willpowerBonus: prevChar.willpowerBonus + 1
+      }));
+      setBonusPoints(bonusPoints - 2);
+    }
+  };
+
+  const handleQuantIncrement = () => {
+    const totalValue = gameChar.quantumBonus + 1;
+    if (totalValue < 10 && bonusPoints >= 7) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        quantumBonus: prevChar.quantumBonus + 1
+      }));
+      setBonusPoints(bonusPoints - 7);
+    }
+  };
+
+  const handleInitIncrement = () => {
+    if (bonusPoints >= 1) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        initiativeBonus: prevChar.initiativeBonus + 1
+      }));
+      setBonusPoints(bonusPoints - 1);
+    }
+  };
+
   const handleAttrDecrement = (index) => {
     const attribute = attributes[index];
 
@@ -92,15 +152,56 @@ const BonusPoints = () => {
 
   const handleAbilDecrement = (index) => {
     const ability = abilities[index];
-    
+
     if (ability.bonusValue > 0) {
       const newAbilities = [...abilities];
       newAbilities[index].bonusValue -= 1;
       setAbilities(newAbilities);
       setBonusPoints(bonusPoints + 2);
     }
-  }
-  
+  };
+
+  const handleBkgrDecrement = (index) => {
+    const background = backgrounds[index];
+
+    if (background.bonusValue > 0) {
+      const newBackgrounds = [...backgrounds];
+      newBackgrounds[index].bonusValue -= 1;
+      setBackgrounds(newBackgrounds);
+      setBonusPoints(bonusPoints + 1);
+    }
+  };
+
+  const handleWillDecrement = () => {
+    if (gameChar.willpowerBonus > 0) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        willpowerBonus: prevChar.willpowerBonus - 1
+      }));
+      setBonusPoints(bonusPoints + 2);
+    }
+  };
+
+  const handleQuantDecrement = () => {
+    if (gameChar.quantumBonus > 0) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        quantumBonus: prevChar.quantumBonus - 1
+      }));
+      setBonusPoints(bonusPoints + 7);
+    }
+  };
+
+  const handleInitDecrement = () => {
+    if (gameChar.initiativeBonus > 0) {
+      setGameChar(prevChar => ({
+        ...prevChar,
+        initiativeBonus: prevChar.initiativeBonus - 1
+      }));
+      setBonusPoints(bonusPoints + 1);
+    }
+  };
+
   const handleSpecialtySubmit = async () => {
     if (selectedAbilityId) {
       try {
@@ -110,6 +211,7 @@ const BonusPoints = () => {
             ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
           )
         );
+        setBonusPoints(bonusPoints - 1);
         handleSpecialtyModalClose();
       } catch (error) {
         console.error('Error adding specialty:', error);
@@ -137,9 +239,23 @@ const BonusPoints = () => {
     }
   };
 
+  const handleSpecialtyDelete = async (specialtyId, abilityId) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/specialties/${specialtyId}`);
+      setAbilities((prevAbilities) =>
+        prevAbilities.map((ability) =>
+          ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
+        )
+      );
+      setBonusPoints(bonusPoints + 1);
+    } catch (error) {
+      console.error('Error deleting specialty:', error);
+    }
+  };
+
   return (
     <Container>
-      <h1 className="text-center my-4">{gameChar.novaName}'s Attributes</h1>
+      <h1 className="text-center my-4">{gameChar.novaName}'s Attributes & Abilities</h1>
       <h3>Bonus Points: {bonusPoints}</h3>
       <form onSubmit={handleSubmit}>
         <div className="attribute-section">
@@ -178,7 +294,7 @@ const BonusPoints = () => {
                                 </div>
                                 <div className='col-md-6 text-start'>
                                   <span className='me-2'>
-                                  <SymbolDisplay value={ability.value + ability.bonusValue} />
+                                    <SymbolDisplay value={ability.value + ability.bonusValue} />
                                   </span>
                                   <ButtonGroup>
                                     <Button variant="danger" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
@@ -195,7 +311,17 @@ const BonusPoints = () => {
                                 <ul className='list-group'>
                                   {ability.specialties.map((specialty, specIndex) => (
                                     <li key={specIndex} className='list-group-item'>
-                                      {specialty.name}: {ability.value}
+                                      <div>
+                                        <span>{specialty.name} <SymbolDisplay value={ability.value + 1} max={6} /></span>
+                                        <Button
+                                          className='ms-2'
+                                          variant="danger"
+                                          size="sm"
+                                          onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
+                                        >
+                                          x
+                                        </Button>
+                                      </div>
                                     </li>
                                   ))}
                                 </ul>
@@ -219,10 +345,10 @@ const BonusPoints = () => {
                         <Form.Group>
                           <Form.Label>Name</Form.Label>
                           <Form.Control
-                          type='text'
-                          name='name'
-                          value={newSpecialty.name}
-                          onChange={handleSpecialtyInputChange}
+                            type='text'
+                            name='name'
+                            value={newSpecialty.name}
+                            onChange={handleSpecialtyInputChange}
                           />
                         </Form.Group>
                       </Form>
@@ -241,6 +367,107 @@ const BonusPoints = () => {
             })}
           </div>
         </div>
+
+        <div className="background-section">
+          <h1 className="text-center my-4">{gameChar.novaName}'s Backgrounds</h1>
+          <h3>Bonus Points: {bonusPoints}</h3>
+          <div className="row">
+            <ul className='list-group'>
+              {backgrounds.map((background, bkgrIndex) => (
+                <li key={bkgrIndex} className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    {background.name}
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-2'>
+                      <SymbolDisplay value={background.value + background.bonusValue} />
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={() => handleBkgrDecrement(bkgrIndex)}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={() => handleBkgrIncrement(bkgrIndex)}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className='additional-section'>
+          <h1 className="text-center my-4">{gameChar.novaName}'s Additional Stats</h1>
+          <h3>Bonus Points: {bonusPoints}</h3>
+          <div className='row'>
+            <ul className='list-group'>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Willpower
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-2'>
+                      <SymbolDisplay value={gameChar.willpowerBonus + 3} max={10} />
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={() => handleWillDecrement()}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={() => handleWillIncrement()}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Quantum
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-2'>
+                      <SymbolDisplay value={gameChar.quantumBonus + 1} max={10} />
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={() => handleQuantDecrement()}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={() => handleQuantIncrement()}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+              <li className='list-group-item'>
+                <div className='row'>
+                  <div className='col-md-6 text-end'>
+                    Initiative
+                  </div>
+                  <div className='col-md-6 text-start'>
+                    <span className='me-3'>
+                      {initiative}
+                    </span>
+                    <ButtonGroup>
+                      <Button variant="danger" size='sm' onClick={() => handleInitDecrement()}>
+                        <i className="bi bi-dash-square"></i>
+                      </Button>
+                      <Button variant="primary" size='sm' onClick={() => handleInitIncrement()}>
+                        <i className="bi bi-plus-square"></i>
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
         <Button className="btn btn-primary" type="submit">Submit</Button>
         <Link className="btn btn-outline-danger mx-2" to="/">Cancel</Link>
       </form>
