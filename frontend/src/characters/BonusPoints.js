@@ -1,27 +1,32 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { Button, ButtonGroup, Col, Container, Form, Modal, Row } from 'react-bootstrap';
+import { Button, ButtonGroup, Col, Container, Form, ListGroup, Modal, Row } from 'react-bootstrap';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import SymbolDisplay from './components/SymbolDisplay';
 
 const BonusPoints = () => {
+  const [gameChar, setGameChar] = useState({});
   const [attributes, setAttributes] = useState([]);
   const [abilities, setAbilities] = useState([]);
   const [backgrounds, setBackgrounds] = useState([]);
-  const [gameChar, setGameChar] = useState({});
   const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
   const [bonusPoints, setBonusPoints] = useState(0);
+  // State for flaws and merits
+  const [flaws, setFlaws] = useState([]);
+  const [merits, setMerits] = useState([]);
+  const [newFlaw, setNewFlaw] = useState({ name: '', value: 0 });
+  const [newMerit, setNewMerit] = useState({ name: '', value: 0 });
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   // Function to get attribute value by name
   const getAttributeValue = (attributeName) => {
     const attribute = attributes.find(attr => attr.name === attributeName);
     return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
   };
-  
+
   // Calculate initiative
   const dexterityValue = getAttributeValue('Dexterity');
   const witsValue = getAttributeValue('Wits');
@@ -31,6 +36,7 @@ const BonusPoints = () => {
     loadGameChar();
   }, []);
 
+  // Load all game character details
   const loadGameChar = async () => {
     try {
       const result = await axios.get(`http://localhost:8080/character/${id}`);
@@ -39,6 +45,8 @@ const BonusPoints = () => {
       setAbilities(result.data.abilities);
       setBackgrounds(result.data.backgrounds);
       setBonusPoints(result.data.bonusPoints);
+      setFlaws(result.data.flaws);
+      setMerits(result.data.merits);
     } catch (error) {
       console.error('Error loading character:', error);
     }
@@ -48,6 +56,7 @@ const BonusPoints = () => {
     return <div>Loading...</div>;
   }
 
+  // Ability specialty modal
   const handleSpecialtyModalShow = (abilityId) => {
     if (bonusPoints > 0) {
       setSelectedAbilityId(abilityId);
@@ -66,6 +75,24 @@ const BonusPoints = () => {
   const handleSpecialtyInputChange = (e) => {
     const { name, value } = e.target;
     setNewSpecialty({ ...newSpecialty, [name]: value });
+  };
+
+  // Handle flaw/merit form changes
+  const handleFlawChange = (e) => setNewFlaw({ ...newFlaw, [e.target.name]: e.target.value });
+  const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
+
+  // Handle flaw/merit form submissions
+  const handleAddFlaw = () => {
+    setFlaws([...flaws, newFlaw]);
+    setNewFlaw({ name: '', value: 0 });
+    setBonusPoints(bonusPoints + newFlaw.value);
+  };
+  const handleAddMerit = () => {
+    if (bonusPoints >= newMerit.value) {
+      setMerits([...merits, newMerit]);
+      setNewMerit({ name: '', value: 0 });
+      setBonusPoints(bonusPoints - newMerit.value);
+    }
   };
 
   const handleAttrIncrement = (index) => {
@@ -224,18 +251,44 @@ const BonusPoints = () => {
 
     const attributeDTOs = attributes.map(attribute => ({
       name: attribute.name,
-      value: attribute.value
+      value: attribute.value,
+      bonusValue: attribute.bonusValue
+    }));
+    const abilityDTOs = abilities.map(ability => ({
+      name: ability.name,
+      value: ability.value,
+      bonusValue: ability.bonusValue
+    }));
+    const backgroundDTOs = backgrounds.map(background => ({
+      name: background.name,
+      value: background.value,
+      bonusValue: background.bonusValue
     }));
 
     try {
-      await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
-        attributes: attributeDTOs,
-        bonusPoints: bonusPoints
-      });
-      alert("Attributes successfully updated");
+      await Promise.all([
+        axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
+          attributes: attributeDTOs,
+        }),
+        axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, {
+          abilities: abilityDTOs,
+        }),
+        axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, {
+          backgrounds: backgroundDTOs,
+        }),
+        axios.put(`http://localhost:8080/character/${id}`, {
+          bonusPoints: gameChar.bonusPoints,
+          willpowerBonus: gameChar.willpowerBonus,
+          quantumBonus: gameChar.quantumBonus,
+          initiativeBonus: gameChar.initiativeBonus,
+          flaws: gameChar.flaws,
+          merits: gameChar.merits,
+        })
+      ]);
+      alert("Bonus points successfully spent");
       navigate('/');
     } catch (error) {
-      console.error('Error updating attributes:', error);
+      console.error('Error updating character:', error);
     }
   };
 
@@ -446,6 +499,84 @@ const BonusPoints = () => {
                 </div>
               </li>
             </ul>
+          </section>
+
+          {/* Flaws Section */}
+          <section className='flaws-section my-4'>
+            <h3>Flaws</h3>
+            <ListGroup className='mb-3'>
+              {flaws.map((flaw, index) => (
+                <ListGroup.Item key={index}>
+                  {flaw.name} <span className='badge bg-danger'>{flaw.value}</span>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Control
+                    type="text"
+                    name="name"
+                    placeholder="Flaw Name"
+                    value={newFlaw.name}
+                    onChange={handleFlawChange}
+                  />
+                </Col>
+                <Col>
+                  <Form.Control
+                    type="number"
+                    name="value"
+                    placeholder="Value"
+                    value={newFlaw.value}
+                    onChange={handleFlawChange}
+                    min={1}
+                    max={7}
+                  />
+                </Col>
+                <Col>
+                  <Button variant="primary" onClick={handleAddFlaw}>Add Flaw</Button>
+                </Col>
+              </Row>
+            </Form>
+          </section>
+
+          {/* Merits Section */}
+          <section className='merits-section my-4'>
+            <h3>Merits</h3>
+            <ListGroup className='mb-3'>
+              {merits.map((merit, index) => (
+                <ListGroup.Item key={index}>
+                  {merit.name} <span className='badge bg-primary'>{merit.value}</span>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Control
+                    type="text"
+                    name="name"
+                    placeholder="Merit Name"
+                    value={newMerit.name}
+                    onChange={handleMeritChange}
+                  />
+                </Col>
+                <Col>
+                  <Form.Control
+                    type="number"
+                    name="value"
+                    placeholder="Value"
+                    value={newMerit.value}
+                    onChange={handleMeritChange}
+                    min={1}
+                    max={7}
+                  />
+                </Col>
+                <Col>
+                  <Button variant="primary" onClick={handleAddMerit}>Add Merit</Button>
+                </Col>
+              </Row>
+            </Form>
           </section>
           {/* Submit and Cancel Buttons */}
           <div className="d-flex justify-content-center my-4">
