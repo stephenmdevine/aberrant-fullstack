@@ -83,9 +83,10 @@ const BonusPoints = () => {
 
   // Handle flaw/merit form submissions
   const handleAddFlaw = () => {
+    const flawValue = parseInt(newFlaw.value, 10); // Ensure value is treated as a number
     setFlaws([...flaws, newFlaw]);
     setNewFlaw({ name: '', value: 0 });
-    setBonusPoints(bonusPoints + newFlaw.value);
+    setBonusPoints(bonusPoints + flawValue);
   };
   const handleAddMerit = () => {
     if (bonusPoints >= newMerit.value) {
