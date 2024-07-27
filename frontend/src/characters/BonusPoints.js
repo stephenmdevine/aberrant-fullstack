@@ -251,43 +251,37 @@ const BonusPoints = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const attributeDTOs = attributes.map(attribute => ({
-      name: attribute.name,
-      value: attribute.value,
-      bonusValue: attribute.bonusValue
-    }));
-    const abilityDTOs = abilities.map(ability => ({
-      name: ability.name,
-      value: ability.value,
-      bonusValue: ability.bonusValue
-    }));
-    const backgroundDTOs = backgrounds.map(background => ({
-      name: background.name,
-      value: background.value,
-      bonusValue: background.bonusValue
-    }));
+    // Gather all data to send
+    const gameCharUpdateData = {
+      // Include all the necessary fields and lists from your state
+      player: gameChar.player,
+      name: gameChar.name,
+      novaName: gameChar.novaName,
+      concept: gameChar.concept,
+      nature: gameChar.nature,
+      allegiance: gameChar.allegiance,
+      description: gameChar.description,
+      attributePoints: gameChar.attributePoints,
+      abilityPoints: gameChar.abilityPoints,
+      backgroundPoints: gameChar.backgroundPoints,
+      bonusPoints: bonusPoints,
+      novaPoints: gameChar.novaPoints,
+      experiencePoints: gameChar.experiencePoints,
+      willpowerBonus: gameChar.willpowerBonus,
+      quantumBonus: gameChar.quantumBonus,
+      quantumNova: gameChar.quantumNova,
+      quantumPoolBonus: gameChar.quantumPoolBonus,
+      initiativeBonus: gameChar.initiativeBonus,
+      taint: gameChar.taint,
+      attributes: gameChar.attributes,
+      abilities: abilities,
+      backgrounds: gameChar.backgrounds,
+      flaws: flaws,
+      merits: merits,
+    };
 
     try {
-      await Promise.all([
-        axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
-          attributes: attributeDTOs,
-        }),
-        axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, {
-          abilities: abilityDTOs,
-        }),
-        axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, {
-          backgrounds: backgroundDTOs,
-        }),
-        axios.put(`http://localhost:8080/character/${id}`, {
-          bonusPoints: gameChar.bonusPoints,
-          willpowerBonus: gameChar.willpowerBonus,
-          quantumBonus: gameChar.quantumBonus,
-          initiativeBonus: gameChar.initiativeBonus,
-          flaws: gameChar.flaws,
-          merits: gameChar.merits,
-        })
-      ]);
-      console.log(bonusPoints);
+      await axios.put(`http://localhost:8080/character/${id}`, gameCharUpdateData);
       alert("Bonus points successfully spent");
       navigate('/');
     } catch (error) {
@@ -309,12 +303,24 @@ const BonusPoints = () => {
     }
   };
 
+  const handleFlawDelete = async (flawId, flawValue) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
+      setFlaws((prevFlaws) =>
+        prevFlaws.filter((flaw) => flaw.id !== flawId)
+      );
+      setBonusPoints(bonusPoints - parseInt(flawValue, 10));
+    } catch (error) {
+      console.error('Error deleting flaw:', error);
+    }
+  };
+
   return (
-    <Container>
+    <Container fluid>
       {/* Fixed Navbar and Header */}
-      <header style={{ position: 'fixed', top: 70, width: '100%', backgroundColor: '#f8f9fa', zIndex: 1 }}>
+      <header style={{ position: 'fixed', top: 56, width: '100%', backgroundColor: '#f8f9fa', zIndex: 1030, padding: 15 }}>
         <Container>
-          <Row className="align-items-center py-3">
+          <Row className="align-items-center">
             <Col>
               <h1 className="text-center">{gameChar.novaName}'s Attributes & Abilities</h1>
             </Col>
@@ -327,7 +333,7 @@ const BonusPoints = () => {
         </Container>
       </header>
       {/* Main Content */}
-      <main style={{ paddingTop: '150px' }}>
+      <main style={{ paddingTop: '120px' }}>
         <form onSubmit={handleSubmit}>
           {/* Attributes and Abilities Section */}
           <section className="attribute-section mb-5">
@@ -511,6 +517,14 @@ const BonusPoints = () => {
               {flaws.map((flaw, index) => (
                 <ListGroup.Item key={index}>
                   {flaw.name} <span className='badge bg-danger'>{flaw.value}</span>
+                  <Button
+                    className='ms-2'
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleFlawDelete(flaw.id, flaw.value)}
+                  >
+                    x
+                  </Button>
                 </ListGroup.Item>
               ))}
             </ListGroup>
