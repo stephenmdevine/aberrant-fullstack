@@ -89,10 +89,11 @@ const BonusPoints = () => {
     setBonusPoints(bonusPoints + flawValue);
   };
   const handleAddMerit = () => {
-    if (bonusPoints >= newMerit.value) {
+    const meritValue = parseInt(newMerit.value, 10);
+    if (bonusPoints >= meritValue) {
       setMerits([...merits, newMerit]);
       setNewMerit({ name: '', value: 0 });
-      setBonusPoints(bonusPoints - newMerit.value);
+      setBonusPoints(bonusPoints - meritValue);
     }
   };
 
@@ -286,6 +287,7 @@ const BonusPoints = () => {
           merits: gameChar.merits,
         })
       ]);
+      console.log(bonusPoints);
       alert("Bonus points successfully spent");
       navigate('/');
     } catch (error) {
