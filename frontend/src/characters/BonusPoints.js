@@ -97,42 +97,76 @@ const BonusPoints = () => {
     }
   };
 
-  const handleAttrIncrement = (index) => {
+  const handleAttrIncrement = async (index) => {
 
     const attribute = attributes[index];
     const totalValue = attribute.value + attribute.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 5) {
-      const newAttributes = [...attributes];
-      newAttributes[index].bonusValue += 1;
-      setAttributes(newAttributes);
-      setBonusPoints(bonusPoints - 5);
+      const formattedAttributes = attributes.map(attr => ({
+        name: attr.name,
+        value: attr.value,
+        bonusValue: attr.bonusValue,
+      }));
+  
+      try {
+        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: formattedAttributes });
+        const newAttributes = [...attributes];
+        newAttributes[index].bonusValue += 1;
+        setAttributes(newAttributes);
+        setBonusPoints(bonusPoints - 5);
+      } catch (error) {
+        console.error('Error saving attributes:', error);
+        alert('Failed to save attributes.');
+      }
     }
   };
 
-  const handleAbilIncrement = (index) => {
+  const handleAbilIncrement = async (index) => {
 
     const ability = abilities[index];
     const totalValue = ability.value + ability.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 2) {
-      const newAbilities = [...abilities];
-      newAbilities[index].bonusValue += 1;
-      setAbilities(newAbilities);
-      setBonusPoints(bonusPoints - 2);
+      const abilityDTOs = abilities.map(ability => ({
+        name: ability.name,
+        value: ability.value,
+        bonusValue: ability.bonusValue,
+      }));
+  
+      try {
+        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: abilityDTOs });
+        const newAbilities = [...abilities];
+        newAbilities[index].bonusValue += 1;
+        setAbilities(newAbilities);
+        setBonusPoints(bonusPoints - 2);
+      } catch (error) {
+        console.error('Error updating abilities: ', error);
+      }
     }
   };
 
-  const handleBkgrIncrement = (index) => {
+  const handleBkgrIncrement = async (index) => {
 
     const background = backgrounds[index];
     const totalValue = background.value + background.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 1) {
-      const newBackgrounds = [...backgrounds];
-      newBackgrounds[index].bonusValue += 1;
-      setBackgrounds(newBackgrounds);
-      setBonusPoints(bonusPoints - 1);
+      const backgroundDTOs = backgrounds.map(background => ({
+        name: background.name,
+        value: background.value,
+        bonusValue: background.bonusValue,
+      }));
+
+      try {
+        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: backgroundDTOs });
+        const newBackgrounds = [...backgrounds];
+        newBackgrounds[index].bonusValue += 1;
+        setBackgrounds(newBackgrounds);
+        setBonusPoints(bonusPoints - 1);
+      } catch (error) {
+        console.error('Error updating backgrounds: ', error);
+      }
     }
   };
 
@@ -168,36 +202,70 @@ const BonusPoints = () => {
     }
   };
 
-  const handleAttrDecrement = (index) => {
+  const handleAttrDecrement = async (index) => {
     const attribute = attributes[index];
 
     if (attribute.bonusValue > 0) {
-      const newAttributes = [...attributes];
-      newAttributes[index].bonusValue -= 1;
-      setAttributes(newAttributes);
-      setBonusPoints(bonusPoints + 5);
+      const formattedAttributes = attributes.map(attr => ({
+        name: attr.name,
+        value: attr.value,
+        bonusValue: attr.bonusValue,
+      }));
+  
+      try {
+        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: formattedAttributes });
+        const newAttributes = [...attributes];
+        newAttributes[index].bonusValue -= 1;
+        setAttributes(newAttributes);
+        setBonusPoints(bonusPoints + 5);
+      } catch (error) {
+        console.error('Error saving attributes:', error);
+        alert('Failed to save attributes.');
+      }
     }
   };
 
-  const handleAbilDecrement = (index) => {
+  const handleAbilDecrement = async (index) => {
     const ability = abilities[index];
 
     if (ability.bonusValue > 0) {
-      const newAbilities = [...abilities];
-      newAbilities[index].bonusValue -= 1;
-      setAbilities(newAbilities);
-      setBonusPoints(bonusPoints + 2);
+      const abilityDTOs = abilities.map(ability => ({
+        name: ability.name,
+        value: ability.value,
+        bonusValue: ability.bonusValue,
+      }));
+  
+      try {
+        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: abilityDTOs });
+        const newAbilities = [...abilities];
+        newAbilities[index].bonusValue -= 1;
+        setAbilities(newAbilities);
+        setBonusPoints(bonusPoints + 2);
+      } catch (error) {
+        console.error('Error updating abilities: ', error);
+      }
     }
   };
 
-  const handleBkgrDecrement = (index) => {
+  const handleBkgrDecrement = async (index) => {
     const background = backgrounds[index];
 
     if (background.bonusValue > 0) {
-      const newBackgrounds = [...backgrounds];
-      newBackgrounds[index].bonusValue -= 1;
-      setBackgrounds(newBackgrounds);
-      setBonusPoints(bonusPoints + 1);
+      const backgroundDTOs = backgrounds.map(background => ({
+        name: background.name,
+        value: background.value,
+        bonusValue: background.bonusValue,
+      }));
+
+      try {
+        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: backgroundDTOs });
+        const newBackgrounds = [...backgrounds];
+        newBackgrounds[index].bonusValue -= 1;
+        setBackgrounds(newBackgrounds);
+        setBonusPoints(bonusPoints + 1);
+      } catch (error) {
+        console.error('Error updating backgrounds: ', error);
+      }
     }
   };
 
@@ -254,30 +322,11 @@ const BonusPoints = () => {
     // Gather all data to send
     const gameCharUpdateData = {
       // Include all the necessary fields and lists from your state
-      player: gameChar.player,
-      name: gameChar.name,
-      novaName: gameChar.novaName,
-      concept: gameChar.concept,
-      nature: gameChar.nature,
-      allegiance: gameChar.allegiance,
-      description: gameChar.description,
-      attributePoints: gameChar.attributePoints,
-      abilityPoints: gameChar.abilityPoints,
-      backgroundPoints: gameChar.backgroundPoints,
       bonusPoints: bonusPoints,
-      novaPoints: gameChar.novaPoints,
-      experiencePoints: gameChar.experiencePoints,
       willpowerBonus: gameChar.willpowerBonus,
       quantumBonus: gameChar.quantumBonus,
-      quantumNova: gameChar.quantumNova,
-      quantumPoolBonus: gameChar.quantumPoolBonus,
       initiativeBonus: gameChar.initiativeBonus,
       taint: gameChar.taint,
-      attributes: gameChar.attributes,
-      abilities: abilities,
-      backgrounds: gameChar.backgrounds,
-      flaws: flaws,
-      merits: merits,
     };
 
     try {
