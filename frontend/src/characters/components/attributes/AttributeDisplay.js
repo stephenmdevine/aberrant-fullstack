@@ -22,7 +22,7 @@ const AttributeDisplay = ({ attrName, attrValue, abilities }) => {
                                 {ability.name} 
                             </div>
                             <div className='col-md-6 text-start'>
-                                <SymbolDisplay value={ability.value}/>
+                                <SymbolDisplay value={ability.value + ability.bonusValue}/>
                             </div>
                         </div>
                     </li>

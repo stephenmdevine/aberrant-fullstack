@@ -103,14 +103,14 @@ const BonusPoints = () => {
     const totalValue = attribute.value + attribute.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 5) {
-      const formattedAttributes = attributes.map(attr => ({
-        name: attr.name,
-        value: attr.value,
-        bonusValue: attr.bonusValue,
-      }));
+      const updatedAttribute = {
+        name: attribute.name,
+        value: attribute.value,
+        bonusValue: attribute.bonusValue + 1,
+      };
   
       try {
-        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: formattedAttributes });
+        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: updatedAttribute });
         const newAttributes = [...attributes];
         newAttributes[index].bonusValue += 1;
         setAttributes(newAttributes);
@@ -128,14 +128,14 @@ const BonusPoints = () => {
     const totalValue = ability.value + ability.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 2) {
-      const abilityDTOs = abilities.map(ability => ({
+      const updatedAbility = {
         name: ability.name,
         value: ability.value,
-        bonusValue: ability.bonusValue,
-      }));
+        bonusValue: ability.bonusValue + 1,
+      };
   
       try {
-        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: abilityDTOs });
+        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: updatedAbility });
         const newAbilities = [...abilities];
         newAbilities[index].bonusValue += 1;
         setAbilities(newAbilities);
@@ -152,14 +152,14 @@ const BonusPoints = () => {
     const totalValue = background.value + background.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 1) {
-      const backgroundDTOs = backgrounds.map(background => ({
+      const updatedBackground = {
         name: background.name,
         value: background.value,
-        bonusValue: background.bonusValue,
-      }));
+        bonusValue: background.bonusValue + 1,
+      };
 
       try {
-        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: backgroundDTOs });
+        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: updatedBackground });
         const newBackgrounds = [...backgrounds];
         newBackgrounds[index].bonusValue += 1;
         setBackgrounds(newBackgrounds);
@@ -206,14 +206,14 @@ const BonusPoints = () => {
     const attribute = attributes[index];
 
     if (attribute.bonusValue > 0) {
-      const formattedAttributes = attributes.map(attr => ({
-        name: attr.name,
-        value: attr.value,
-        bonusValue: attr.bonusValue,
-      }));
+      const updatedAttribute = {
+        name: attribute.name,
+        value: attribute.value,
+        bonusValue: attribute.bonusValue - 1,
+      };
   
       try {
-        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: formattedAttributes });
+        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: updatedAttribute });
         const newAttributes = [...attributes];
         newAttributes[index].bonusValue -= 1;
         setAttributes(newAttributes);
@@ -229,14 +229,14 @@ const BonusPoints = () => {
     const ability = abilities[index];
 
     if (ability.bonusValue > 0) {
-      const abilityDTOs = abilities.map(ability => ({
+      const updatedAbility = {
         name: ability.name,
         value: ability.value,
-        bonusValue: ability.bonusValue,
-      }));
+        bonusValue: ability.bonusValue - 1,
+      };
   
       try {
-        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: abilityDTOs });
+        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: updatedAbility });
         const newAbilities = [...abilities];
         newAbilities[index].bonusValue -= 1;
         setAbilities(newAbilities);
@@ -251,14 +251,14 @@ const BonusPoints = () => {
     const background = backgrounds[index];
 
     if (background.bonusValue > 0) {
-      const backgroundDTOs = backgrounds.map(background => ({
+      const updatedBackground = {
         name: background.name,
         value: background.value,
         bonusValue: background.bonusValue,
-      }));
+      };
 
       try {
-        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: backgroundDTOs });
+        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: updatedBackground });
         const newBackgrounds = [...backgrounds];
         newBackgrounds[index].bonusValue -= 1;
         setBackgrounds(newBackgrounds);
@@ -330,7 +330,7 @@ const BonusPoints = () => {
     };
 
     try {
-      await axios.put(`http://localhost:8080/character/${id}`, gameCharUpdateData);
+      await axios.put(`http://localhost:8080/character/additionalStats/${id}`, gameCharUpdateData);
       alert("Bonus points successfully spent");
       navigate('/');
     } catch (error) {

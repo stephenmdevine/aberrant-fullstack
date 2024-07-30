@@ -62,7 +62,7 @@ export default function ViewGameChar() {
                             <AttributeDisplay
                             key={index}
                             attrName={attribute.name}
-                            attrValue={attribute.value}
+                            attrValue={attribute.value + attribute.bonusValue}
                             abilities={abilities}
                             />
                         ))}
