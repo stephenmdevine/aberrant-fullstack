@@ -264,8 +264,7 @@ const BonusPoints = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Gather all data to send
+    
     const gameCharUpdateData = {
       // Include all the necessary fields and lists from your state
       bonusPoints: bonusPoints,
@@ -275,14 +274,56 @@ const BonusPoints = () => {
       taint: gameChar.taint,
     };
 
+    const attributeDTOs = attributes.map(attribute => ({
+        name: attribute.name,
+        value: attribute.value,
+        bonusValue: attribute.bonusValue,
+        novaValue: attribute.novaValue,
+        expValue: attribute.expValue,
+    }));
+
+    const abilityDTOs = abilities.map(ability => ({
+        name: ability.name,
+        value: ability.value,
+        bonusValue: ability.bonusValue,
+        novaValue: ability.novaValue,
+        expValue: ability.expValue,
+    }));
+
+    const backgroundDTOs = backgrounds.map(background => ({
+        name: background.name,
+        value: background.value,
+        bonusValue: background.bonusValue,
+        novaValue: background.novaValue,
+        expValue: background.expValue,
+    }));
+
     try {
-      await axios.put(`http://localhost:8080/character/additionalStats/${id}`, gameCharUpdateData);
-      alert("Bonus points successfully spent");
-      navigate('/');
+        await Promise.all([
+            axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
+                attributes: attributeDTOs,
+            }),
+            axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, {
+                abilities: abilityDTOs,
+            }),
+            axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, {
+                backgrounds: backgroundDTOs,
+            }),
+            axios.put(`http://localhost:8080/character/${id}`, {
+              bonusPoints: bonusPoints,
+              willpowerBonus: gameChar.willpowerBonus,
+              quantumBonus: gameChar.quantumBonus,
+              initiativeBonus: gameChar.initiativeBonus,
+              taint: gameChar.taint,
+            })
+        ]);
+
+        alert("Character successfully updated");
+        navigate('/');
     } catch (error) {
-      console.error('Error updating character:', error);
+        console.error('Error updating character:', error);
     }
-  };
+};
 
   const handleSpecialtyDelete = async (specialtyId, abilityId) => {
     try {
@@ -657,6 +698,15 @@ export default BonusPoints;
 const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const gameCharUpdateData = {
+      // Include all the necessary fields and lists from your state
+      bonusPoints: bonusPoints,
+      willpowerBonus: gameChar.willpowerBonus,
+      quantumBonus: gameChar.quantumBonus,
+      initiativeBonus: gameChar.initiativeBonus,
+      taint: gameChar.taint,
+    };
+
     const attributeDTOs = attributes.map(attribute => ({
         name: attribute.name,
         value: attribute.value
@@ -672,16 +722,6 @@ const handleSubmit = async (e) => {
         name: background.name,
         value: background.value
     }));
-
-    const flawsToAdd = flaws.map(flaw => ({
-      ...flaw,
-      gameCharId: id
-      }));
-
-    const meritsToAdd = merits.mao(merit => ({
-      ...merit,
-      gameCharId: id
-      }));
 
     try {
         await Promise.all([
@@ -708,6 +748,32 @@ const handleSubmit = async (e) => {
         console.error('Error updating character:', error);
     }
 };
+*/
+
+/*
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Gather all data to send
+    const gameCharUpdateData = {
+      // Include all the necessary fields and lists from your state
+      bonusPoints: bonusPoints,
+      willpowerBonus: gameChar.willpowerBonus,
+      quantumBonus: gameChar.quantumBonus,
+      initiativeBonus: gameChar.initiativeBonus,
+      taint: gameChar.taint,
+    };
+
+    try {
+      await axios.put(`http://localhost:8080/character/additionalStats/${id}`, gameCharUpdateData);
+      alert("Bonus points successfully spent");
+      navigate('/');
+    } catch (error) {
+      console.error('Error updating character:', error);
+    }
+  };
 */
 
 /*
