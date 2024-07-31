@@ -82,91 +82,71 @@ const BonusPoints = () => {
   const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
 
   // Handle flaw/merit form submissions
-  const handleAddFlaw = () => {
-    const flawValue = parseInt(newFlaw.value, 10); // Ensure value is treated as a number
-    setFlaws([...flaws, newFlaw]);
-    setNewFlaw({ name: '', value: 0 });
-    setBonusPoints(bonusPoints + flawValue);
+  const handleAddFlaw = async () => {
+    const flawValue = parseInt(newFlaw.value, 10);
+    const flawData = { ...newFlaw, gameCharId: id };
+
+    try {
+      await axios.post(`http://localhost:8080/${id}/flaws`, flawData);
+      setFlaws([...flaws, flawData]);
+      setNewFlaw({ name: '', value: 0 });
+      setBonusPoints(bonusPoints + flawValue);
+    } catch (error) {
+      console.error('Error adding flaw: ', error);
+    }
   };
-  const handleAddMerit = () => {
+  const handleAddMerit = async () => {
     const meritValue = parseInt(newMerit.value, 10);
+    const meritData = { ...newMerit, gameCharId: id };
+
     if (bonusPoints >= meritValue) {
-      setMerits([...merits, newMerit]);
-      setNewMerit({ name: '', value: 0 });
-      setBonusPoints(bonusPoints - meritValue);
+      try {
+        await axios.post(`http://localhost:8080/${id}/merits`, meritData);
+        setMerits([...merits, newMerit]);
+        setNewMerit({ name: '', value: 0 });
+        setBonusPoints(bonusPoints - meritValue);
+      } catch (error) {
+        console.log('Error adding merit: ', error);
+      }
     }
   };
 
-  const handleAttrIncrement = async (index) => {
+  const handleAttrIncrement = (index) => {
 
     const attribute = attributes[index];
     const totalValue = attribute.value + attribute.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 5) {
-      const updatedAttribute = {
-        name: attribute.name,
-        value: attribute.value,
-        bonusValue: attribute.bonusValue + 1,
-      };
-  
-      try {
-        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: updatedAttribute });
         const newAttributes = [...attributes];
         newAttributes[index].bonusValue += 1;
         setAttributes(newAttributes);
         setBonusPoints(bonusPoints - 5);
-      } catch (error) {
-        console.error('Error saving attributes:', error);
-        alert('Failed to save attributes.');
-      }
     }
   };
 
-  const handleAbilIncrement = async (index) => {
+  const handleAbilIncrement = (index) => {
 
     const ability = abilities[index];
     const totalValue = ability.value + ability.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 2) {
-      const updatedAbility = {
-        name: ability.name,
-        value: ability.value,
-        bonusValue: ability.bonusValue + 1,
-      };
-  
-      try {
-        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: updatedAbility });
         const newAbilities = [...abilities];
         newAbilities[index].bonusValue += 1;
         setAbilities(newAbilities);
         setBonusPoints(bonusPoints - 2);
-      } catch (error) {
-        console.error('Error updating abilities: ', error);
-      }
     }
   };
 
-  const handleBkgrIncrement = async (index) => {
+  const handleBkgrIncrement = (index) => {
 
     const background = backgrounds[index];
     const totalValue = background.value + background.bonusValue;
 
     if (totalValue < 5 && bonusPoints >= 1) {
-      const updatedBackground = {
-        name: background.name,
-        value: background.value,
-        bonusValue: background.bonusValue + 1,
-      };
-
-      try {
-        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: updatedBackground });
         const newBackgrounds = [...backgrounds];
         newBackgrounds[index].bonusValue += 1;
         setBackgrounds(newBackgrounds);
         setBonusPoints(bonusPoints - 1);
-      } catch (error) {
-        console.error('Error updating backgrounds: ', error);
-      }
     }
   };
 
@@ -202,70 +182,36 @@ const BonusPoints = () => {
     }
   };
 
-  const handleAttrDecrement = async (index) => {
+  const handleAttrDecrement = (index) => {
     const attribute = attributes[index];
 
     if (attribute.bonusValue > 0) {
-      const updatedAttribute = {
-        name: attribute.name,
-        value: attribute.value,
-        bonusValue: attribute.bonusValue - 1,
-      };
-  
-      try {
-        await axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, { attributes: updatedAttribute });
         const newAttributes = [...attributes];
         newAttributes[index].bonusValue -= 1;
         setAttributes(newAttributes);
         setBonusPoints(bonusPoints + 5);
-      } catch (error) {
-        console.error('Error saving attributes:', error);
-        alert('Failed to save attributes.');
-      }
     }
   };
 
-  const handleAbilDecrement = async (index) => {
+  const handleAbilDecrement = (index) => {
     const ability = abilities[index];
 
     if (ability.bonusValue > 0) {
-      const updatedAbility = {
-        name: ability.name,
-        value: ability.value,
-        bonusValue: ability.bonusValue - 1,
-      };
-  
-      try {
-        await axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, { abilities: updatedAbility });
         const newAbilities = [...abilities];
         newAbilities[index].bonusValue -= 1;
         setAbilities(newAbilities);
         setBonusPoints(bonusPoints + 2);
-      } catch (error) {
-        console.error('Error updating abilities: ', error);
-      }
     }
   };
 
-  const handleBkgrDecrement = async (index) => {
+  const handleBkgrDecrement =  (index) => {
     const background = backgrounds[index];
 
     if (background.bonusValue > 0) {
-      const updatedBackground = {
-        name: background.name,
-        value: background.value,
-        bonusValue: background.bonusValue,
-      };
-
-      try {
-        await axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, { backgrounds: updatedBackground });
         const newBackgrounds = [...backgrounds];
         newBackgrounds[index].bonusValue -= 1;
         setBackgrounds(newBackgrounds);
         setBonusPoints(bonusPoints + 1);
-      } catch (error) {
-        console.error('Error updating backgrounds: ', error);
-      }
     }
   };
 
@@ -361,6 +307,18 @@ const BonusPoints = () => {
       setBonusPoints(bonusPoints - parseInt(flawValue, 10));
     } catch (error) {
       console.error('Error deleting flaw:', error);
+    }
+  };
+
+  const handleMeritDelete = async (meritId, meritValue) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
+      setMerits((prevMerits) =>
+        prevMerits.filter((merit) => merit.id !== meritId)
+      );
+      setBonusPoints(bonusPoints + parseInt(meritValue, 10));
+    } catch (error) {
+      console.error('Error deleting merit:', error);
     }
   };
 
@@ -613,6 +571,14 @@ const BonusPoints = () => {
               {merits.map((merit, index) => (
                 <ListGroup.Item key={index}>
                   {merit.name} <span className='badge bg-primary'>{merit.value}</span>
+                  <Button
+                    className='ms-2'
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleMeritDelete(merit.id, merit.value)}
+                  >
+                    x
+                  </Button>
                 </ListGroup.Item>
               ))}
             </ListGroup>
@@ -684,6 +650,66 @@ const BonusPoints = () => {
 };
 
 export default BonusPoints;
+
+// All-in-one handleSubmit:
+
+/*
+const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const attributeDTOs = attributes.map(attribute => ({
+        name: attribute.name,
+        value: attribute.value
+    }));
+
+    const abilityDTOs = abilities.map(ability => ({
+        name: ability.name,
+        value: ability.value,
+        // Include specialties if needed
+    }));
+
+    const backgroundDTOs = backgrounds.map(background => ({
+        name: background.name,
+        value: background.value
+    }));
+
+    const flawsToAdd = flaws.map(flaw => ({
+      ...flaw,
+      gameCharId: id
+      }));
+
+    const meritsToAdd = merits.mao(merit => ({
+      ...merit,
+      gameCharId: id
+      }));
+
+    try {
+        await Promise.all([
+            axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
+                attributes: attributeDTOs,
+            }),
+            axios.put(`http://localhost:8080/allocateAbilityPoints/${id}`, {
+                abilities: abilityDTOs,
+            }),
+            axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, {
+                backgrounds: backgroundDTOs,
+            }),
+            axios.put(`http://localhost:8080/character/${id}`, {
+                bonusPoints,
+                willpowerBonus: gameChar.willpowerBonus,
+                quantumBonus: gameChar.quantumBonus,
+                initiativeBonus: gameChar.initiativeBonus,
+            })
+        ]);
+
+        alert("Character successfully updated");
+        navigate('/');
+    } catch (error) {
+        console.error('Error updating character:', error);
+    }
+};
+*/
+
 /*
 
     <Container>
