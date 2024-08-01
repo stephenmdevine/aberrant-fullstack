@@ -262,6 +262,28 @@ const BonusPoints = () => {
     }
   };
 
+  const handleQualityChange = (index, field, value) => {
+    const newAttributes = [...attributes];
+    newAttributes[index].quality = {
+      ...newAttributes[index].quality,
+      [field]: value
+    };
+    setAttributes(newAttributes);
+  };
+
+  const handleQualitySave = async (index) => {
+    const attribute = attributes[index];
+    if (attribute.quality && attribute.quality.name) {
+      try {
+        await axios.put(`http://localhost:8080/attribute/${attribute.id}/quality`, attribute.quality);
+        alert('Quality saved successfully!');
+      } catch (error) {
+        console.error('Error saving quality:', error);
+        alert('Failed to save quality.');
+      }
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -407,6 +429,22 @@ const BonusPoints = () => {
                           </Button>
                         </ButtonGroup>
                       </div>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+          {attr.value + attr.bonusValue > 4 && (
+            <div>
+              <input
+                type="text"
+                placeholder="Quality Name"
+                value={attr.quality?.name || ''}
+                onChange={(e) => handleQualityChange(index, 'name', e.target.value)}
+              />
+              <button onClick={() => handleQualitySave(index)}>Save Quality</button>
+            </div>
+          )}
+
                     </Col>
                   </Row>
                   <Row>
