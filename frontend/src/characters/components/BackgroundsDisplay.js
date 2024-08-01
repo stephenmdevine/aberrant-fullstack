@@ -19,7 +19,7 @@ const BackgroundsDisplay = ({ backgrounds }) => {
                                         {background.name}
                                     </div>
                                     <div className="col-md-6 text-start">
-                                        <SymbolDisplay value={background.value}/>
+                                        <SymbolDisplay value={background.value + background.bonusValue}/>
                                     </div>
                                 </div>
                             </li>
@@ -35,7 +35,7 @@ const BackgroundsDisplay = ({ backgrounds }) => {
                                         {background.name}
                                     </div>
                                     <div className="col-md-6 text-start">
-                                        <SymbolDisplay value={background.value}/>
+                                        <SymbolDisplay value={background.value + background.bonusValue}/>
                                     </div>
                                 </div>
                             </li>
@@ -51,7 +51,7 @@ const BackgroundsDisplay = ({ backgrounds }) => {
                                         {background.name}
                                     </div>
                                     <div className="col-md-6 text-start">
-                                        <SymbolDisplay value={background.value}/>
+                                        <SymbolDisplay value={background.value + background.bonusValue}/>
                                     </div>
                                 </div>
                             </li>

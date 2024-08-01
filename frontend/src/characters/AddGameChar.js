@@ -22,10 +22,10 @@ export default function AddGameChar() {
         experiencePoints: 0
     });
 
-    const {player, name, novaName, 
-        concept, nature, allegiance, description, 
-        attributePoints, abilityPoints, backgroundPoints, 
-        bonusPoints, novaPoints, experiencePoints} = gameChar;
+    // const {player, name, novaName, 
+    //     concept, nature, allegiance, description, 
+    //     attributePoints, abilityPoints, backgroundPoints, 
+    //     bonusPoints, novaPoints, experiencePoints} = gameChar;
 
     const onInputChange = (e) => {
         setGameChar({ ...gameChar, [e.target.name]: e.target.value });
@@ -33,8 +33,12 @@ export default function AddGameChar() {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        await axios.post('http://localhost:8080/character', gameChar);
-        navigate('/');
+        try {
+            await axios.post('http://localhost:8080/character', gameChar);
+            navigate('/');
+        }   catch (error) {
+            console.error('Error creating character: ', error);
+        }
     };
 
   return (
@@ -50,7 +54,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Your name" 
                         name='player' 
-                        value={player} 
+                        value={gameChar.player} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
                     <div className='mb-3'>
@@ -60,7 +64,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Your character's 'real' name" 
                         name='name' 
-                        value={name} 
+                        value={gameChar.name} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
                     <div className='mb-3'>
@@ -70,7 +74,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Your superhero name" 
                         name='novaName' 
-                        value={novaName} 
+                        value={gameChar.novaName} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
 
@@ -81,7 +85,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Your character's profession, personality, or interests" 
                         name='concept' 
-                        value={concept} 
+                        value={gameChar.concept} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
                     <div className='mb-3'>
@@ -91,7 +95,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Your character's core being" 
                         name='nature' 
-                        value={nature} 
+                        value={gameChar.nature} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
                     <div className='mb-3'>
@@ -101,7 +105,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Who your character works for" 
                         name='allegiance' 
-                        value={allegiance} 
+                        value={gameChar.allegiance} 
                         onChange={(e) => onInputChange(e)} />
                     </div>
                     <div>
@@ -110,7 +114,7 @@ export default function AddGameChar() {
                         className='form-control' 
                         placeholder="Describe your character" 
                         name='description' 
-                        value={description} 
+                        value={gameChar.description} 
                         onChange={(e) => onInputChange(e)}></textarea>
                     </div>
 
@@ -123,7 +127,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='attributePoints' 
-                                value={attributePoints} 
+                                value={gameChar.attributePoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                             <div className='mb-3 w-25 px-2'>
@@ -132,7 +136,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='abilityPoints' 
-                                value={abilityPoints} 
+                                value={gameChar.abilityPoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                             <div className='mb-3 w-25 px-2'>
@@ -141,7 +145,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='backgroundPoints' 
-                                value={backgroundPoints} 
+                                value={gameChar.backgroundPoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                         </div>
@@ -153,7 +157,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='bonusPoints' 
-                                value={bonusPoints} 
+                                value={gameChar.bonusPoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                             <div className='mb-3 w-25 px-2'>
@@ -162,7 +166,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='novaPoints' 
-                                value={novaPoints} 
+                                value={gameChar.novaPoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                             <div className='mb-3 w-25 px-2'>
@@ -171,7 +175,7 @@ export default function AddGameChar() {
                                 type={'number'} 
                                 className='form-control text-center' 
                                 name='experiencePoints' 
-                                value={experiencePoints} 
+                                value={gameChar.experiencePoints} 
                                 onChange={(e) => onInputChange(e)} />
                             </div>
                         </div>
@@ -183,5 +187,5 @@ export default function AddGameChar() {
             </div>
         </div>
     </div>
-  )
+  );
 }

@@ -12,7 +12,8 @@ const BonusPoints = () => {
   const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
-  const [qualityName, setQualityName] = useState('');
+  // const [qualityName, setQualityName] = useState('');
+  // const [existingQuality, setExistingQuality] = useState('');
   const [bonusPoints, setBonusPoints] = useState(0);
   // State for flaws and merits
   const [flaws, setFlaws] = useState([]);
@@ -36,6 +37,20 @@ const BonusPoints = () => {
   useEffect(() => {
     loadGameChar();
   }, []);
+  
+  // // Fetch existing quality for the attribute when the component mounts
+  // useEffect(() => {
+  //   const fetchQuality = async () => {
+  //     try {
+  //       const response = await axios.get(`http://localhost:8080/api/attributes/${attributeId}/quality`);
+  //       setExistingQuality(response.data.name);
+  //     } catch (error) {
+  //       console.error('Error fetching quality:', error);
+  //     }
+  //   };
+
+  //   fetchQuality();
+  // }, [attributeId]);
 
   // Load all game character details
   const loadGameChar = async () => {
@@ -263,14 +278,20 @@ const BonusPoints = () => {
     }
   };
 
-  const handleQualityChange = async (attributeId, qualityName) => {
-    try {
-      await axios.post(`http://localhost:8080/api/attributes/${attributeId}/quality`, { name: qualityName });
-      // Update state or UI as needed after successful update
-    } catch (error) {
-      console.error('Error updating quality:', error);
-    }
-  };
+  // const handleQualityChange = (event) => {
+  //   setQualityName(event.target.value);
+  // };
+  
+  // const saveQuality = async (attributeId, qualityName) => {
+  //   try {
+  //     await axios.post(`http://localhost:8080/api/attributes/${attributeId}/quality`, { name: qualityName });
+  //     // Update state or UI as needed after successful update
+  //     setExistingQuality(qualityName);
+  //     setQualityName('');
+  //   } catch (error) {
+  //     console.error('Error updating quality:', error);
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -422,23 +443,8 @@ const BonusPoints = () => {
                   <Row>
                     <Col>
                     {attribute.value + attribute.bonusValue >= 4 && (
-                      <div className='py-2'>
-                        <input
-                          type="text"
-                        className='me-2'
-                          value={qualityName}
-                          onChange={(e) => setQualityName(e.target.value)}
-                          placeholder="Enter Quality Name"
-                        />
-                        <Button 
-                        variant='primary' 
-                        onClick={() => handleQualityChange(attribute.id, qualityName)}>
-                          Save Quality
-                          </Button>
-
-                      </div>
+                      <QualityManager attributeId={attribute.id} />
                     )}
-
                     </Col>
                   </Row>
                   <Row>
@@ -719,10 +725,66 @@ const BonusPoints = () => {
       </Modal>
     </Container>
   );
-
 };
 
 export default BonusPoints;
+
+
+
+
+const QualityManager = ({ attributeId }) => {
+  // State to hold the quality name entered by the user
+  const [qualityName, setQualityName] = useState('');
+  // State to hold the existing quality name (if any) for placeholder
+  const [existingQuality, setExistingQuality] = useState('');
+
+  // Fetch existing quality for the attribute when the component mounts
+  useEffect(() => {
+    const fetchQuality = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/attributes/${attributeId}/quality`);
+        setExistingQuality(response.data.name);
+      } catch (error) {
+        console.error('Error fetching quality:', error);
+      }
+    };
+
+    fetchQuality();
+  }, [attributeId]);
+
+  // Handle input changes
+  const handleQualityChange = (event) => {
+    setQualityName(event.target.value);
+  };
+
+  // Save or update the quality
+  const saveQuality = async () => {
+    try {
+      await axios.post(`http://localhost:8080/api/attributes/${attributeId}/quality`, { name: qualityName });
+      setExistingQuality(qualityName); // Update the existing quality name with the new one
+      setQualityName(''); // Clear the input field
+    } catch (error) {
+      console.error('Error saving quality:', error);
+    }
+  };
+
+  return (
+    <div className='py-2'>
+      <input
+        type="text"
+        className='me-2'
+        value={qualityName}
+        onChange={handleQualityChange}
+        placeholder={existingQuality || "Enter Quality Name"}
+      />
+      <Button 
+      variant='primary' 
+      onClick={saveQuality}>
+        Save Quality
+        </Button>
+    </div>
+  );
+};
 
 // All-in-one handleSubmit:
 
