@@ -12,6 +12,7 @@ const BonusPoints = () => {
   const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
+  const [qualityName, setQualityName] = useState('');
   const [bonusPoints, setBonusPoints] = useState(0);
   // State for flaws and merits
   const [flaws, setFlaws] = useState([]);
@@ -420,13 +421,23 @@ const BonusPoints = () => {
                   </Row>
                   <Row>
                     <Col>
-                      <input
-                        type="text"
-                        value={qualityName}
-                        onChange={(e) => setQualityName(e.target.value)}
-                        placeholder="Enter Quality Name"
-                      />
-                      <button onClick={() => handleQualityChange(attributeId, qualityName)}>Save Quality</button>
+                    {attribute.value + attribute.bonusValue >= 4 && (
+                      <div className='py-2'>
+                        <input
+                          type="text"
+                        className='me-2'
+                          value={qualityName}
+                          onChange={(e) => setQualityName(e.target.value)}
+                          placeholder="Enter Quality Name"
+                        />
+                        <Button 
+                        variant='primary' 
+                        onClick={() => handleQualityChange(attribute.id, qualityName)}>
+                          Save Quality
+                          </Button>
+
+                      </div>
+                    )}
 
                     </Col>
                   </Row>
