@@ -262,25 +262,12 @@ const BonusPoints = () => {
     }
   };
 
-  const handleQualityChange = (index, field, value) => {
-    const newAttributes = [...attributes];
-    newAttributes[index].quality = {
-      ...newAttributes[index].quality,
-      [field]: value
-    };
-    setAttributes(newAttributes);
-  };
-
-  const handleQualitySave = async (index) => {
-    const attribute = attributes[index];
-    if (attribute.quality && attribute.quality.name) {
-      try {
-        await axios.put(`http://localhost:8080/attribute/${attribute.id}/quality`, attribute.quality);
-        alert('Quality saved successfully!');
-      } catch (error) {
-        console.error('Error saving quality:', error);
-        alert('Failed to save quality.');
-      }
+  const handleQualityChange = async (attributeId, qualityName) => {
+    try {
+      await axios.post(`http://localhost:8080/api/attributes/${attributeId}/quality`, { name: qualityName });
+      // Update state or UI as needed after successful update
+    } catch (error) {
+      console.error('Error updating quality:', error);
     }
   };
 
@@ -433,17 +420,13 @@ const BonusPoints = () => {
                   </Row>
                   <Row>
                     <Col>
-          {attr.value + attr.bonusValue > 4 && (
-            <div>
-              <input
-                type="text"
-                placeholder="Quality Name"
-                value={attr.quality?.name || ''}
-                onChange={(e) => handleQualityChange(index, 'name', e.target.value)}
-              />
-              <button onClick={() => handleQualitySave(index)}>Save Quality</button>
-            </div>
-          )}
+                      <input
+                        type="text"
+                        value={qualityName}
+                        onChange={(e) => setQualityName(e.target.value)}
+                        placeholder="Enter Quality Name"
+                      />
+                      <button onClick={() => handleQualityChange(attributeId, qualityName)}>Save Quality</button>
 
                     </Col>
                   </Row>
