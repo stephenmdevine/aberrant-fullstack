@@ -398,8 +398,8 @@ const BonusPoints = () => {
                     <Col className="text-center">
                       <div className="btn-toolbar justify-content-center" role="toolbar">
                         <h4 className='me-2'><SymbolDisplay value={attribute.value + attribute.bonusValue} /></h4>
-                        <ButtonGroup>
-                          <Button variant="danger" onClick={() => handleAttrDecrement(attrIndex)}>
+                        <ButtonGroup className='border rounded shadow'>
+                          <Button variant="light" onClick={() => handleAttrDecrement(attrIndex)}>
                             <i className="bi bi-dash-square"></i>
                           </Button>
                           <Button variant="primary" onClick={() => handleAttrIncrement(attrIndex)}>
@@ -429,8 +429,8 @@ const BonusPoints = () => {
                                 <span className='me-2'>
                                   <SymbolDisplay value={ability.value + ability.bonusValue} />
                                 </span>
-                                <ButtonGroup>
-                                  <Button variant="danger" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
+                                <ButtonGroup className='border rounded shadow'>
+                                  <Button variant="light" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
                                     <i className="bi bi-dash-square"></i>
                                   </Button>
                                   <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(abilIndex)}>
@@ -484,8 +484,8 @@ const BonusPoints = () => {
                       <span className='me-2'>
                         <SymbolDisplay value={background.value + background.bonusValue} />
                       </span>
-                      <ButtonGroup>
-                        <Button variant="danger" size='sm' onClick={() => handleBkgrDecrement(bkgrIndex)}>
+                      <ButtonGroup className='border rounded shadow'>
+                        <Button variant="light" size='sm' onClick={() => handleBkgrDecrement(bkgrIndex)}>
                           <i className="bi bi-dash-square"></i>
                         </Button>
                         <Button variant="primary" size='sm' onClick={() => handleBkgrIncrement(bkgrIndex)}>
@@ -511,8 +511,8 @@ const BonusPoints = () => {
                     <span className='me-2'>
                       <SymbolDisplay value={gameChar.willpowerBonus + 3} max={10} />
                     </span>
-                    <ButtonGroup>
-                      <Button variant="danger" size='sm' onClick={handleWillDecrement}>
+                    <ButtonGroup className='border rounded shadow'>
+                      <Button variant="light" size='sm' onClick={handleWillDecrement}>
                         <i className="bi bi-dash-square"></i>
                       </Button>
                       <Button variant="primary" size='sm' onClick={handleWillIncrement}>
@@ -531,8 +531,8 @@ const BonusPoints = () => {
                     <span className='me-2'>
                       <SymbolDisplay value={gameChar.quantumBonus + 1} max={10} />
                     </span>
-                    <ButtonGroup>
-                      <Button variant="danger" size='sm' onClick={handleQuantDecrement}>
+                    <ButtonGroup className='border rounded shadow'>
+                      <Button variant="light" size='sm' onClick={handleQuantDecrement}>
                         <i className="bi bi-dash-square"></i>
                       </Button>
                       <Button variant="primary" size='sm' onClick={handleQuantIncrement}>
@@ -551,8 +551,8 @@ const BonusPoints = () => {
                     <span className='me-3'>
                       {initiative}
                     </span>
-                    <ButtonGroup>
-                      <Button variant="danger" size='sm' onClick={handleInitDecrement}>
+                    <ButtonGroup className='border rounded shadow'>
+                      <Button variant="light" size='sm' onClick={handleInitDecrement}>
                         <i className="bi bi-dash-square"></i>
                       </Button>
                       <Button variant="primary" size='sm' onClick={handleInitIncrement}>
@@ -571,7 +571,7 @@ const BonusPoints = () => {
             <ListGroup className='mb-3'>
               {flaws.map((flaw, index) => (
                 <ListGroup.Item key={index}>
-                  {flaw.name} <span className='badge bg-danger'>{flaw.value}</span>
+                  {flaw.name} <span className='badge bg-warning'>{flaw.value}</span>
                   <Button
                     className='ms-2'
                     variant="danger"

@@ -45,8 +45,13 @@ const AttributeDisplay = ({ attribute, abilities }) => {
                                 <ul className='list-group'>
                                     {ability.specialties.map((specialty, specIndex) => (
                                         <li key={specIndex} className='list-group-item bg-body-secondary'>
-                                            <div>
-                                                <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + 1} max={6} /></span>
+                                            <div className='row'>
+                                                <div className='col-md-6 text-end'>
+                                                    {specialty.name}
+                                                </div>
+                                                <div className='col-md-6 text-start'>
+                                                    <SymbolDisplay value={ability.value + ability.bonusValue + 1} max={6} />
+                                                </div>
                                             </div>
                                         </li>
                                     ))}

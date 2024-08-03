@@ -1,8 +1,8 @@
 import React from 'react';
 
-const SymbolDisplay = ({ value, max = 5 }) => {
-  const filledSymbol = '⬤';
-  const emptySymbol = '⭘';
+const SymbolDisplay = ({ value, max = 5, box = false }) => {
+  const filledSymbol = box ? '☐' : '⬤';
+  const emptySymbol = box ? '☐' : '⭘';
   
   const symbols = [];
 
