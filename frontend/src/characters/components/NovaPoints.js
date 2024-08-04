@@ -425,6 +425,12 @@ const NovaPoints = () => {
             expValue: background.expValue,
         }));
 
+        const MegaAttributeDTOs = megaAttributes.map(megaAttribute => ({
+            name: megaAttribute.name,
+            value: megaAttribute.value,
+            expValue: megaAttribute.expValue,
+        }));
+
         try {
             await Promise.all([
                 axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
@@ -435,6 +441,9 @@ const NovaPoints = () => {
                 }),
                 axios.put(`http://localhost:8080/allocateBackgroundPoints/${id}`, {
                     backgrounds: backgroundDTOs,
+                }),
+                axios.put(`http://localhost:8080/allocateMegaAttributePoints/${id}`, {
+                    megaAttributes: MegaAttributeDTOs,
                 }),
                 axios.put(`http://localhost:8080/character/${id}`, {
                     bonusPoints: bonusPoints,
