@@ -49,7 +49,7 @@ export default function Home() {
                   <Link className='btn btn-primary mx-1' to={`/spendBonusPoints/${gameChar.id}`}>Bonus Points</Link>
                 </td>
                 <td>
-                  <Link className='btn btn-primary mx-1' to={'/'}>Nova Points</Link>
+                  <Link className='btn btn-primary mx-1' to={`/spendNovaPoints/${gameChar.id}`}>Nova Points</Link>
                 </td>
                 <td>
                   <Link className='btn btn-primary mx-1' to={`/viewCharacter/${gameChar.id}`}>View Character</Link>

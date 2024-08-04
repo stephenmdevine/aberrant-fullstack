@@ -13,6 +13,7 @@ const BonusPoints = () => {
   const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
   const [bonusPoints, setBonusPoints] = useState(0);
+  const [novaPoints, setNovaPoints] = useState(0);
   // State for flaws and merits
   const [flaws, setFlaws] = useState([]);
   const [merits, setMerits] = useState([]);
@@ -45,6 +46,7 @@ const BonusPoints = () => {
       setAbilities(result.data.abilities);
       setBackgrounds(result.data.backgrounds);
       setBonusPoints(result.data.bonusPoints);
+      setNovaPoints(result.data.novaPoints);
       setFlaws(result.data.flaws);
       setMerits(result.data.merits);
     } catch (error) {
@@ -268,6 +270,7 @@ const BonusPoints = () => {
     const gameCharUpdateData = {
       // Include all the necessary fields and lists from your state
       bonusPoints: bonusPoints,
+      novaPoints: novaPoints,
       willpowerBonus: gameChar.willpowerBonus,
       quantumBonus: gameChar.quantumBonus,
       initiativeBonus: gameChar.initiativeBonus,
@@ -311,6 +314,7 @@ const BonusPoints = () => {
             }),
             axios.put(`http://localhost:8080/character/${id}`, {
               bonusPoints: bonusPoints,
+              novaPoints: novaPoints,
               willpowerBonus: gameChar.willpowerBonus,
               quantumBonus: gameChar.quantumBonus,
               initiativeBonus: gameChar.initiativeBonus,
