@@ -14,6 +14,8 @@ const BonusPoints = () => {
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
   const [bonusPoints, setBonusPoints] = useState(0);
   const [novaPoints, setNovaPoints] = useState(0);
+  const [baseTaint, setBaseTaint] = useState(0);
+  const [taint, setTaint] = useState(0);
   // State for flaws and merits
   const [flaws, setFlaws] = useState([]);
   const [merits, setMerits] = useState([]);
@@ -25,7 +27,7 @@ const BonusPoints = () => {
   // Function to get attribute value by name
   const getAttributeValue = (attributeName) => {
     const attribute = attributes.find(attr => attr.name === attributeName);
-    return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
+    return attribute ? (attribute.value + attribute.bonusValue) : 0; // Return 0 if the attribute is not found
   };
 
   // Calculate initiative
@@ -37,6 +39,15 @@ const BonusPoints = () => {
     loadGameChar();
   }, []);
 
+  useEffect(() => {
+    const nodeBackground = backgrounds.find(background => background.name === 'Node');
+
+    if (nodeBackground && nodeBackground.value > 2) {
+      const newTaint = nodeBackground.value - 2;
+      setBaseTaint(newTaint);
+    }
+  }, [backgrounds]);
+
   // Load all game character details
   const loadGameChar = async () => {
     try {
@@ -47,6 +58,8 @@ const BonusPoints = () => {
       setBackgrounds(result.data.backgrounds);
       setBonusPoints(result.data.bonusPoints);
       setNovaPoints(result.data.novaPoints);
+      setBaseTaint(result.data.baseTaint);
+      setTaint(result.data.taint);
       setFlaws(result.data.flaws);
       setMerits(result.data.merits);
     } catch (error) {
@@ -149,6 +162,10 @@ const BonusPoints = () => {
         newBackgrounds[index].bonusValue += 1;
         setBackgrounds(newBackgrounds);
         setBonusPoints(bonusPoints - 1);
+
+        if (background.name === 'Node' && background.value + background.bonusValue > 2) {
+          setTaint(taint + 1);
+        }
     }
   };
 
@@ -214,6 +231,10 @@ const BonusPoints = () => {
         newBackgrounds[index].bonusValue -= 1;
         setBackgrounds(newBackgrounds);
         setBonusPoints(bonusPoints + 1);
+
+        if (background.name === 'Node' && background.value + background.bonusValue > 2) {
+          setTaint(taint - 1);
+        }
     }
   };
 
@@ -315,6 +336,8 @@ const BonusPoints = () => {
             axios.put(`http://localhost:8080/character/${id}`, {
               bonusPoints: bonusPoints,
               novaPoints: novaPoints,
+              baseTaint: baseTaint,
+              taint: taint,
               willpowerBonus: gameChar.willpowerBonus,
               quantumBonus: gameChar.quantumBonus,
               initiativeBonus: gameChar.initiativeBonus,

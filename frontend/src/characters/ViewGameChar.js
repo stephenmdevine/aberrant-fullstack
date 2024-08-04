@@ -35,6 +35,11 @@ export default function ViewGameChar() {
     const merits = gameChar.merits;
     const quantumPool = gameChar.quantumPoolBonus + 20 + ((gameChar.quantumBonus + 1) * 2);
 
+    const taint = gameChar.baseTaint + gameChar.taint;
+    const megaAttributes = gameChar.megaAttributes;
+    const enhancements = megaAttributes.enhancements;
+    const powers = gameChar.powers;
+
     // Function to get attribute value by name
     const getAttributeValue = (attributeName) => {
       const attribute = attributes.find(attr => attr.name === attributeName);
@@ -124,7 +129,7 @@ export default function ViewGameChar() {
                                 <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={gameChar.willpowerBonus + 3} max={10} /></h3>
                                 <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={0} max={10} box={true} /></h3>
                                 <h3 className='pt-4'>Taint</h3>
-                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={gameChar.taint} max={10} /></h3>
+                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={taint} max={10} /></h3>
                                 <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={0} max={10} box={true} /></h3>
                                 {gameChar.taint > 3 && (
                                     <h3 className='pt-4'>Aberrations</h3>

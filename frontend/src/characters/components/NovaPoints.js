@@ -17,6 +17,7 @@ const NovaPoints = () => {
     //   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
     const [bonusPoints, setBonusPoints] = useState(0);
     const [novaPoints, setNovaPoints] = useState(0);
+    const [taint, setTaint] = useState(0);
     // State for flaws and merits
     const [flaws, setFlaws] = useState([]);
     const [merits, setMerits] = useState([]);
@@ -70,6 +71,7 @@ const NovaPoints = () => {
             setBackgrounds(result.data.backgrounds);
             setBonusPoints(result.data.bonusPoints);
             setNovaPoints(result.data.novaPoints);
+            setTaint(result.data.taint);
             setFlaws(result.data.flaws);
             setMerits(result.data.merits);
             setMegaAttributes(result.data.megaAttributes);
@@ -231,6 +233,10 @@ const NovaPoints = () => {
             if (freeIncreases === 0) {
                 setNovaPoints(novaPoints - 1);
             }
+
+            if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
+              setTaint(taint + 1);
+            }
         }
     };
 
@@ -323,6 +329,10 @@ const NovaPoints = () => {
 
             if ((totalNovaValue + 1) % 5 === 0) {
                 setNovaPoints(novaPoints + 1);
+            }
+
+            if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
+              setTaint(taint - 1);
             }
         }
     };
