@@ -194,12 +194,11 @@ const NovaPoints = () => {
         }
     };
 
-    const handleAbilIncrement = (index) => {
+    const handleAbilIncrement = (attrIndex, abilIndex) => {
+        const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
+        const ability = attrAbilities[abilIndex];
 
-        const ability = abilities[index];
-        const totalValue = ability.value + ability.bonusValue + ability.novaValue;
-
-        if (totalValue < 5) {
+        if (ability.value + ability.bonusValue + ability.novaValue < 5) {
             const freeIncreases = calculateFreeAbilIncreases();
 
             if (freeIncreases === 0 && novaPoints < 1) {
@@ -207,6 +206,7 @@ const NovaPoints = () => {
                 return;
             }
             const newAbilities = [...abilities];
+            const index = abilities.indexOf(ability);
             newAbilities[index].novaValue += 1;
             setAbilities(newAbilities);
             if (freeIncreases === 0) {
@@ -301,11 +301,13 @@ const NovaPoints = () => {
         }
     };
 
-    const handleAbilDecrement = (index) => {
-        const ability = abilities[index];
+    const handleAbilDecrement = (attrIndex, abilIndex) => {
+        const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
+        const ability = attrAbilities[abilIndex];
 
         if (ability.novaValue > 0) {
             const newAbilities = [...abilities];
+            const index = abilities.indexOf(ability);
             newAbilities[index].novaValue -= 1;
             setAbilities(newAbilities);
 
@@ -458,9 +460,13 @@ const NovaPoints = () => {
                 axios.put(`http://localhost:8080/character/${id}`, {
                     bonusPoints: bonusPoints,
                     novaPoints: novaPoints,
+                    baseTaint: gameChar.baseTaint,
+                    taint: gameChar.taint,
+                    willpowerBonus: gameChar.willpowerBonus,
+                    quantumBonus: gameChar.quantumBonus,
                     willpowerNova: gameChar.willpowerNova,
                     quantumNova: gameChar.quantumNova,
-                    taint: gameChar.taint,
+                    initiativeBonus: gameChar.initiativeBonus,
                 })
             ]);
 
@@ -547,7 +553,7 @@ const NovaPoints = () => {
                     {/* Attributes and Abilities Section */}
                     <section className="attribute-section mb-5">
                         {attributes.map((attribute, attrIndex) => {
-                            const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attribute.name);
+                            const attrAbilities = abilities.filter(ability => ability.associatedAttribute == attribute.name);
                             return (
                                 <Container key={attribute.name} className="my-4">
                                     <Row>
@@ -591,10 +597,10 @@ const NovaPoints = () => {
                                                                     <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue} />
                                                                 </span>
                                                                 <ButtonGroup className='border rounded shadow'>
-                                                                    <Button variant="light" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
+                                                                    <Button variant="light" size='sm' onClick={() => handleAbilDecrement(attrIndex, abilIndex)}>
                                                                         <i className="bi bi-dash-square"></i>
                                                                     </Button>
-                                                                    <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(abilIndex)}>
+                                                                    <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(attrIndex, abilIndex)}>
                                                                         <i className="bi bi-plus-square"></i>
                                                                     </Button>
                                                                 </ButtonGroup>
@@ -607,20 +613,20 @@ const NovaPoints = () => {
                                                                         <div>
                                                                             <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + 1} max={6} /></span>
                                                                             {/* <Button
-                                        className='ms-2'
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
-                                      >
-                                        x
-                                      </Button> */}
+                                                                            className='ms-2'
+                                                                            variant="danger"
+                                                                            size="sm"
+                                                                            onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
+                                                                        >
+                                                                            x
+                                                                        </Button> */}
                                                                         </div>
                                                                     </li>
                                                                 ))}
                                                             </ul>
                                                             {/* {ability.specialties.length < 3 && (
-                                <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
-                              )} */}
+                                                            <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
+                                                            )} */}
                                                         </div>
                                                     </li>
                                                 ))}

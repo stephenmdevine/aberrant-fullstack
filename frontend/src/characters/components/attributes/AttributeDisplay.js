@@ -27,7 +27,7 @@ const AttributeDisplay = ({ attribute, abilities }) => {
                     <h3 className='pt-4'>{attribute.name} </h3>
                 </div>
                 <div className='col-md-6 text-start'>
-                    <h3 className='pt-4'><SymbolDisplay value={attribute.value + attribute.bonusValue}/></h3>
+                    <h3 className='pt-4'><SymbolDisplay value={attribute.value + attribute.bonusValue + attribute.novaValue}/></h3>
                 </div>
                 <h4>{quality}</h4>
             </div>
@@ -39,7 +39,7 @@ const AttributeDisplay = ({ attribute, abilities }) => {
                                 {ability.name} 
                             </div>
                             <div className='col-md-6 text-start'>
-                                <SymbolDisplay value={ability.value + ability.bonusValue}/>
+                                <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue}/>
                             </div>
                             <div>
                                 <ul className='list-group'>
@@ -50,7 +50,7 @@ const AttributeDisplay = ({ attribute, abilities }) => {
                                                     {specialty.name}
                                                 </div>
                                                 <div className='col-md-6 text-start'>
-                                                    <SymbolDisplay value={ability.value + ability.bonusValue + 1} max={6} />
+                                                    <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + 1} max={6} />
                                                 </div>
                                             </div>
                                         </li>

@@ -126,10 +126,10 @@ export default function ViewGameChar() {
                                 <h3>Backgrounds</h3>
                                 <BackgroundsDisplay backgrounds={backgrounds} />
                                 <h3 className='pt-4'>Willpower</h3>
-                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={gameChar.willpowerBonus + 3} max={10} /></h3>
+                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={gameChar.willpowerBonus + gameChar.willpowerNova + 3} max={10} /></h3>
                                 <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={0} max={10} box={true} /></h3>
                                 <h3 className='pt-4'>Taint</h3>
-                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={taint} max={10} /></h3>
+                                <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={gameChar.taint + gameChar.baseTaint} max={10} /></h3>
                                 <h3 style={{textAlignLast: 'justify', textAlign: 'justify'}}><SymbolDisplay value={0} max={10} box={true} /></h3>
                                 {gameChar.taint > 3 && (
                                     <h3 className='pt-4'>Aberrations</h3>

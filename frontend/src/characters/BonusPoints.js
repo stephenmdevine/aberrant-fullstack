@@ -40,11 +40,13 @@ const BonusPoints = () => {
   }, []);
 
   useEffect(() => {
-    const nodeBackground = backgrounds.find(background => background.name === 'Node');
+    const nodeBackground = backgrounds.find(background => background.name == 'Node');
 
     if (nodeBackground && nodeBackground.value > 2) {
+      console.log(nodeBackground.value);
       const newTaint = nodeBackground.value - 2;
       setBaseTaint(newTaint);
+      console.log(baseTaint);
     }
   }, [backgrounds]);
 
@@ -340,8 +342,9 @@ const BonusPoints = () => {
               taint: taint,
               willpowerBonus: gameChar.willpowerBonus,
               quantumBonus: gameChar.quantumBonus,
+              willpowerNova: gameChar.willpowerNova,
+              quantumNova: gameChar.quantumNova,
               initiativeBonus: gameChar.initiativeBonus,
-              taint: gameChar.taint,
             })
         ]);
 

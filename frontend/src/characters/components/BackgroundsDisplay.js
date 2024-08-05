@@ -73,14 +73,14 @@ const Test = ({ backgrounds }) => {
             <ul className="list-group">
                 {backgrounds.map((background, index) => (
                     <div>
-                    {background.value + background.bonusValue > 0 && (
+                    {background.value + background.bonusValue + background.novaValue > 0 && (
                         <li key={index} className="list-group-item">
                             <div className="row">
                                 <div className="col-md-6 text-end">
                                     {background.name}
                                 </div>
                                 <div className="col-md-6 text-start">
-                                    <SymbolDisplay value={background.value + background.bonusValue} />
+                                    <SymbolDisplay value={background.value + background.bonusValue + background.novaValue} />
                                 </div>
                             </div>
                         </li>
