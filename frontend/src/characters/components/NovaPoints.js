@@ -235,7 +235,7 @@ const NovaPoints = () => {
             }
 
             if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
-              setTaint(taint + 1);
+                setTaint(taint + 1);
             }
         }
     };
@@ -334,7 +334,7 @@ const NovaPoints = () => {
             }
 
             if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
-              setTaint(taint - 1);
+                setTaint(taint - 1);
             }
         }
     };
@@ -760,25 +760,14 @@ const NovaPoints = () => {
                                     </Row>
                                     <Row>
                                         <Col className="text-center">
-                                            {megaAttribute.enhancements.map((enhancement, enhanceIndex) => (
-                                                <ul className='list-group'>
-                                                    {enhancement.value > 0 && (
-                                                        <li key={enhanceIndex} className='list-group-item'>
-                                                            <div>
-                                                                <span>{enhancement.name}</span>
-                                                                <Button
-                                                                    className='ms-2'
-                                                                    variant="danger"
-                                                                    size="sm"
-                                                                    onClick={() => handleEnhancementDelete(enhancement.id, megaAttribute.id)}
-                                                                >
-                                                                    x
-                                                                </Button>
-                                                            </div>
-                                                        </li>
-                                                    )}
-                                                </ul>
-                                            ))}
+                                            {megaAttribute.value > 0 && (
+                                                <EnhancementManager
+                                                    megaAttributeId={megaAttribute.id}
+                                                    novaPoints={novaPoints}
+                                                    setNovaPoints={setNovaPoints}
+                                                />
+
+                                            )}
                                         </Col>
                                     </Row>
                                 </Container>
@@ -972,6 +961,101 @@ const QualityManager = ({ attributeId }) => {
                 variant='primary'
                 onClick={saveQuality}>
                 Save Quality
+            </Button>
+        </div>
+    );
+};
+
+
+
+const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
+    // State to hold the quality name entered by the user
+    const [enhancementName, setEnhancementName] = useState('');
+    // State to hold the existing quality name (if any) for placeholder
+    const [existingEnhancements, setExistingEnhancements] = useState([]);
+
+    // Fetch existing quality for the attribute when the component mounts
+    const fetchEnhancements = async () => {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements`);
+            setExistingEnhancements(response.data);
+        } catch (error) {
+            console.error('Error fetching enhancement:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchEnhancements();
+    }, [megaAttributeId]);
+
+    // Handle input changes
+    const handleEnhancementChange = (event) => {
+        setEnhancementName(event.target.value);
+    };
+
+    // Save or update the quality
+    const saveEnhancement = async () => {
+        const enhancementCost = existingEnhancements.length > 0 ? 3 : 0;
+
+        if (novaPoints < enhancementCost) {
+            alert('Not enough nova points');
+            return;
+        }
+
+        try {
+            await axios.post(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements`, { name: enhancementName });
+            setExistingEnhancements([...existingEnhancements, { name: enhancementName }]);
+            setEnhancementName(''); // Clear the input field
+            if (enhancementCost > 0) {
+                setNovaPoints(novaPoints - enhancementCost);
+            }
+        } catch (error) {
+            console.error('Error saving enhancement:', error);
+        }
+    };
+
+    const handleDeleteEnhancement = async (megaAttributeId, enhancementId) => {
+        const enhancementCostReturn = existingEnhancements.length > 1 ? 3 : 0;
+
+        try {
+            const response = await axios.delete(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements/${enhancementId}`);
+            if (enhancementCostReturn > 0) {
+                setNovaPoints(novaPoints + enhancementCostReturn);
+            }
+            fetchEnhancements();
+        } catch (error) {
+            console.error('Error deleting enhancement:', error);
+        }
+    };
+
+    return (
+        <div className='py-2'>
+            <div className='m-2'>
+                {existingEnhancements.map((enhancement, index) => (
+                    <div className='p-1'>
+                        <span key={index}>{enhancement.name}</span>
+                        <Button
+                            className='ms-2'
+                            variant="danger"
+                            size="sm"
+                            onClick={() => handleDeleteEnhancement(megaAttributeId, enhancement.id)}
+                        >
+                            x
+                        </Button>
+                    </div>
+                ))}
+            </div>
+            <input
+                type="text"
+                className='me-2'
+                value={enhancementName}
+                onChange={handleEnhancementChange}
+                placeholder={"Enter Enhancement Name"}
+            />
+            <Button
+                variant='primary'
+                onClick={saveEnhancement}>
+                Add Enhancement
             </Button>
         </div>
     );

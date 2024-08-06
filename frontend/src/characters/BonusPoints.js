@@ -112,6 +112,7 @@ const BonusPoints = () => {
       console.error('Error adding flaw: ', error);
     }
   };
+
   const handleAddMerit = async () => {
     const meritValue = parseInt(newMerit.value, 10);
     const meritData = { ...newMerit, gameCharId: id };
@@ -141,13 +142,13 @@ const BonusPoints = () => {
     }
   };
 
-  const handleAbilIncrement = (index) => {
+  const handleAbilIncrement = (attrIndex, abilIndex) => {
+    const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
+    const ability = attrAbilities[abilIndex];
 
-    const ability = abilities[index];
-    const totalValue = ability.value + ability.bonusValue;
-
-    if (totalValue < 5 && bonusPoints >= 2) {
+    if (ability.value + ability.bonusValue < 5 && bonusPoints >= 2) {
         const newAbilities = [...abilities];
+        const index = abilities.indexOf(ability);
         newAbilities[index].bonusValue += 1;
         setAbilities(newAbilities);
         setBonusPoints(bonusPoints - 2);
@@ -214,11 +215,13 @@ const BonusPoints = () => {
     }
   };
 
-  const handleAbilDecrement = (index) => {
-    const ability = abilities[index];
+  const handleAbilDecrement = (attrIndex, abilIndex) => {
+    const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
+    const ability = attrAbilities[abilIndex];
 
     if (ability.bonusValue > 0) {
         const newAbilities = [...abilities];
+        const index = abilities.indexOf(ability);
         newAbilities[index].bonusValue -= 1;
         setAbilities(newAbilities);
         setBonusPoints(bonusPoints + 2);
@@ -460,10 +463,10 @@ const BonusPoints = () => {
                                   <SymbolDisplay value={ability.value + ability.bonusValue} />
                                 </span>
                                 <ButtonGroup className='border rounded shadow'>
-                                  <Button variant="light" size='sm' onClick={() => handleAbilDecrement(abilIndex)}>
+                                  <Button variant="light" size='sm' onClick={() => handleAbilDecrement(attrIndex, abilIndex)}>
                                     <i className="bi bi-dash-square"></i>
                                   </Button>
-                                  <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(abilIndex)}>
+                                  <Button variant="primary" size='sm' onClick={() => handleAbilIncrement(attrIndex, abilIndex)}>
                                     <i className="bi bi-plus-square"></i>
                                   </Button>
                                 </ButtonGroup>
