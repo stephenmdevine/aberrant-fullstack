@@ -26,8 +26,6 @@ const NovaPoints = () => {
     // State for Nova characteristics
     const [megaAttributes, setMegaAttributes] = useState([]);
     const [powers, setPowers] = useState([]);
-    const [showEnhancementModal, setShowEnhancementModal] = useState(false);
-    const [newEnhancement, setNewEnhancement] = useState({ name: '', value: 0 });
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -477,20 +475,6 @@ const NovaPoints = () => {
         }
     };
 
-    const handleEnhancementDelete = async (enhancementId, megaAttributeId) => {
-        try {
-            await axios.delete(`http://localhost:8080/api/enhancements/${enhancementId}`);
-            setMegaAttributes((prevMegaAttributes) =>
-                prevMegaAttributes.map((megaAttribute) =>
-                    megaAttribute.id === megaAttributeId ? { ...megaAttribute, enhancements: megaAttribute.enhancements.filter(enhancement => enhancement.id !== enhancementId) } : megaAttribute
-                )
-            ); // TODO:
-            setNovaPoints();
-        } catch (error) {
-            console.error('Error deleting enhancement:', error);
-        }
-    };
-
     //   const handleSpecialtyDelete = async (specialtyId, abilityId) => {
     //     try {
     //       await axios.delete(`http://localhost:8080/api/specialties/${specialtyId}`);
@@ -770,6 +754,42 @@ const NovaPoints = () => {
                                             )}
                                         </Col>
                                     </Row>
+                                </Container>
+                            );
+                        })}
+
+                    </section>
+
+                    {/* SUPERPOWERS! */}
+                    <section className='mega-section my-4'>
+                        <h1>{gameChar.novaName}'s Quantum Powers</h1>
+                        {powers.map((power, powIndex) => {
+                            return (
+                                <Container key={power.name} className='my-4'>
+                                    <Row>
+                                        <h4>{power.name}</h4>
+                                    </Row>
+                                    <Row>
+                                        <Col>
+                                            <div className="btn-toolbar justify-content-center" role="toolbar">
+                                                <h4 className='me-2'><SymbolDisplay value={power.value} /></h4>
+                                                <ButtonGroup className='border rounded shadow'>
+                                                    <Button variant="light" onClick={() => handlePowerDecrement(megaIndex)}>
+                                                        <i className="bi bi-dash-square"></i>
+                                                    </Button>
+                                                    <Button variant="primary" onClick={() => handlePowerIncrement(megaIndex)}>
+                                                        <i className="bi bi-plus-square"></i>
+                                                    </Button>
+                                                </ButtonGroup>
+                                            </div>
+                                        </Col>
+                                    </Row>
+                                    <Row>Level: {power.level}</Row>
+                                    <Row>Quantum Minimum: {power.quantumMinimum}</Row>
+                                    <Row>Dice Pool: {power.attribute} + {power.name}</Row>
+                                    {power.hasExtra && (
+                                        <Row>Extra: {power.extraName}</Row>
+                                    )}
                                 </Container>
                             );
                         })}
