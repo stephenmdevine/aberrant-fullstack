@@ -26,6 +26,17 @@ const NovaPoints = () => {
     // State for Nova characteristics
     const [megaAttributes, setMegaAttributes] = useState([]);
     const [powers, setPowers] = useState([]);
+    const [newPower, setNewPower] = useState({
+        name: "",
+        value: 0,
+        level: 1,
+        quantumMinimum: 1,
+        hasExtra: false,
+        extraName: ""
+    });
+    const [powerLevel, setPowerLevel] = useState(1);
+    const [powerQMin, setPowerQMin] = useState(1);
+    const [powerHasExtra, setPowerHasExtra] = useState(false);
 
     const { id } = useParams();
     const navigate = useNavigate();
@@ -271,7 +282,19 @@ const NovaPoints = () => {
             setMegaAttributes(newMegaAttributes);
             setNovaPoints(novaPoints - 3);
         }
-    }
+    };
+
+    const handlePowerIncrement = (index) => {
+        const power = powers[index];
+        const powerCost = (2 * (power.level - 1)) + 1;
+
+        if (power.value < 5 && novaPoints >= powerCost) {
+            const newPowers = [...powers];
+            newPowers[index].value += 1;
+            setPowers(newPowers);
+            setNovaPoints(novaPoints - powerCost);
+        }
+    };
 
     //   const handleInitIncrement = () => {
     //     if (bonusPoints >= 1) {
@@ -366,7 +389,19 @@ const NovaPoints = () => {
             setMegaAttributes(newMegaAttributes);
             setNovaPoints(novaPoints + 3);
         }
-    }
+    };
+
+    const handlePowerDecrement = (index) => {
+        const power = powers[index];
+        const powerCost = (2 * (power.level - 1)) + 1;
+
+        if (power.value > 0) {
+            const newPowers = [...powers];
+            newPowers[index].value -= 1;
+            setPowers(newPowers);
+            setNovaPoints(novaPoints + powerCost);
+        }
+    };
 
     //   const handleInitDecrement = () => {
     //     if (gameChar.initiativeBonus > 0) {
@@ -398,6 +433,37 @@ const NovaPoints = () => {
     const handleEnhancementSubmit = async () => {
 
     };
+
+    const handlePowerInputChange = (e) => {
+        const { name, value, type, checked } = e.target;
+
+        if (name === 'level' && value === '3') {
+            setNewPower({
+                ...newPower,
+                level: value,
+                hasExtra: false
+            });
+        }   else {
+            setNewPower({
+                ...newPower,
+                [name]: type === 'checkbox' ? checked : value
+            });
+        }
+    };
+
+    const handleAddPower = (e) => {
+        e.preventDefault();
+        const updatedPowers = [...powers, newPower];
+        setPowers(updatedPowers);
+        setNewPower({
+            name: "",
+            value: 0,
+            level: 1,
+            quantumMinimum: 1,
+            hasExtra: false,
+            extraName: ""
+        });
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -774,10 +840,10 @@ const NovaPoints = () => {
                                             <div className="btn-toolbar justify-content-center" role="toolbar">
                                                 <h4 className='me-2'><SymbolDisplay value={power.value} /></h4>
                                                 <ButtonGroup className='border rounded shadow'>
-                                                    <Button variant="light" onClick={() => handlePowerDecrement(megaIndex)}>
+                                                    <Button variant="light" onClick={() => handlePowerDecrement(powIndex)}>
                                                         <i className="bi bi-dash-square"></i>
                                                     </Button>
-                                                    <Button variant="primary" onClick={() => handlePowerIncrement(megaIndex)}>
+                                                    <Button variant="primary" onClick={() => handlePowerIncrement(powIndex)}>
                                                         <i className="bi bi-plus-square"></i>
                                                     </Button>
                                                 </ButtonGroup>
@@ -793,7 +859,171 @@ const NovaPoints = () => {
                                 </Container>
                             );
                         })}
-
+                        {/* <Container className='border rounded col-md-6'>
+                            <h4>New Power</h4>
+                            <form onSubmit={handleAddPower}>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Power Name</label>
+                                    </div>
+                                    <div className='col-md-6 text-start'>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            placeholder='power name'
+                                            name='powerName'
+                                            value={newPower.name}
+                                            onChange={(e) => onPowerInputChange(e)} />
+                                    </div>
+                                </div>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Base Power Level (with no extras)</label>
+                                    </div>
+                                    <div className='col-md-3 text-start'>
+                                        <input
+                                            type="range"
+                                            min={1}
+                                            max={3}
+                                            className="form-range"
+                                            defaultValue={powerLevel}
+                                            onChange={(e) => setPowerLevel(e.target.value)} />
+                                    </div>
+                                    <div className='col-md-1 text-start'>{powerLevel}</div>
+                                </div>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Minimum Quantum</label>
+                                    </div>
+                                    <div className='col-md-5 text-start'>
+                                        <input
+                                            type="range"
+                                            min={1}
+                                            max={5}
+                                            className="form-range"
+                                            value={powerQMin}
+                                            onChange={(e) => setPowerQMin(e.target.value)} />
+                                    </div>
+                                    <div className='col-md-1 text-start'>{powerQMin}</div>
+                                </div>
+                                <div className='text-center'>
+                                    <div className='form-check-reverse form-check-inline'>
+                                        <input 
+                                        className='form-check-input' 
+                                        type='checkbox' 
+                                        value={powerHasExtra} 
+                                        id='hasExtra' 
+                                        onChange={(e) => setPowerHasExtra(e.target.value)}/>
+                                        <label className='form-check-label' htmlFor='hasExtra'>
+                                            Extra
+                                        </label>
+                                    </div>
+                                </div>
+                                {powerHasExtra && (
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Extra Name</label>
+                                    </div>
+                                    <div className='col-md-6 text-start'>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            placeholder='extra name'
+                                            name='extraName'
+                                            value={newPower.extraName}
+                                            onChange={(e) => onPowerInputChange(e)} />
+                                    </div>
+                                </div>
+                                )} */}
+                        <Container className='border rounded col-md-6'>
+                            <h4>New Power</h4>
+                            <form onSubmit={handleAddPower}>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Power Name</label>
+                                    </div>
+                                    <div className='col-md-6 text-start'>
+                                        <input
+                                            type='text'
+                                            className='form-control'
+                                            placeholder='power name'
+                                            name='name'
+                                            value={newPower.name}
+                                            onChange={handlePowerInputChange}
+                                        />
+                                    </div>
+                                </div>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Base Power Level (with no extras)</label>
+                                    </div>
+                                    <div className='col-md-3 text-start'>
+                                        <input
+                                            type="range"
+                                            min={1}
+                                            max={3}
+                                            className="form-range"
+                                            name='level'
+                                            value={newPower.level}
+                                            onChange={handlePowerInputChange}
+                                        />
+                                    </div>
+                                    <div className='col-md-1 text-start'>{newPower.level}</div>
+                                </div>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Minimum Quantum</label>
+                                    </div>
+                                    <div className='col-md-5 text-start'>
+                                        <input
+                                            type="range"
+                                            min={1}
+                                            max={5}
+                                            className="form-range"
+                                            name='quantumMinimum'
+                                            value={newPower.quantumMinimum}
+                                            onChange={handlePowerInputChange}
+                                        />
+                                    </div>
+                                    <div className='col-md-1 text-start'>{newPower.quantumMinimum}</div>
+                                </div>
+                                <div className='text-center'>
+                                    <div className='form-check-reverse form-check-inline'>
+                                        <input
+                                            className='form-check-input'
+                                            type='checkbox'
+                                            name='hasExtra'
+                                            id='hasExtra'
+                                            checked={newPower.hasExtra}
+                                            onChange={handlePowerInputChange}
+                                        />
+                                        <label className='form-check-label' htmlFor='hasExtra'>
+                                            Extra
+                                        </label>
+                                    </div>
+                                </div>
+                                {newPower.hasExtra && (
+                                    <div className='row'>
+                                        <div className='col-md-6 text-end'>
+                                            <label>Extra Name</label>
+                                        </div>
+                                        <div className='col-md-6 text-start'>
+                                            <input
+                                                type='text'
+                                                className='form-control'
+                                                placeholder='extra name'
+                                                name='extraName'
+                                                value={newPower.extraName}
+                                                onChange={handlePowerInputChange}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="d-flex justify-content-center my-4">
+                                    <Button className="btn btn-primary me-2" type='submit'>Add This Power</Button>
+                                </div>
+                            </form>
+                        </Container>
                     </section>
 
                     {/* Flaws Section */}
