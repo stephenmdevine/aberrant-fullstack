@@ -28,7 +28,8 @@ const NovaPoints = () => {
     const [powers, setPowers] = useState([]);
     const [newPower, setNewPower] = useState({
         name: "",
-        value: 0,
+        value: 1,
+        expValue: 0,
         level: 1,
         quantumMinimum: 1,
         hasExtra: false,
@@ -444,7 +445,7 @@ const NovaPoints = () => {
                 level: value,
                 hasExtra: false
             });
-        }   else {
+        } else {
             setNewPower({
                 ...newPower,
                 [name]: type === 'checkbox' ? checked : value
@@ -454,23 +455,26 @@ const NovaPoints = () => {
 
     const handleAddPower = async (e) => {
         e.preventDefault();
+        console.log("Power save initiated...");
 
         try {
-            const response = await axios.post(`http://localhost:8080/api/powers`, newPower);
-        const updatedPowers = [...powers, response.data];
-        setPowers(updatedPowers);
+            const response = await axios.post(`http://localhost:8080/api/powers/${id}`, newPower);
+            console.log(newPower.name + " saved.");
+            const updatedPowers = [...powers, response.data];
+            setPowers(updatedPowers);
         } catch (error) {
             console.error('Error saving power:', error);
         }
 
         setNewPower({
             name: "",
-            value: 0,
+            value: 1,
+            expValue: 0,
             level: 1,
             quantumMinimum: 1,
             hasExtra: false,
             extraName: "",
-            gameCharId: gameChar.id,
+            attribute: null,
         });
     }
 
