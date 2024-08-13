@@ -32,7 +32,8 @@ const NovaPoints = () => {
         level: 1,
         quantumMinimum: 1,
         hasExtra: false,
-        extraName: ""
+        extraName: "",
+        attribute: null
     });
     const [powerLevel, setPowerLevel] = useState(1);
     const [powerQMin, setPowerQMin] = useState(1);
@@ -451,17 +452,25 @@ const NovaPoints = () => {
         }
     };
 
-    const handleAddPower = (e) => {
+    const handleAddPower = async (e) => {
         e.preventDefault();
-        const updatedPowers = [...powers, newPower];
+
+        try {
+            const response = await axios.post(`http://localhost:8080/api/powers`, newPower);
+        const updatedPowers = [...powers, response.data];
         setPowers(updatedPowers);
+        } catch (error) {
+            console.error('Error saving power:', error);
+        }
+
         setNewPower({
             name: "",
             value: 0,
             level: 1,
             quantumMinimum: 1,
             hasExtra: false,
-            extraName: ""
+            extraName: "",
+            gameCharId: gameChar.id,
         });
     }
 
@@ -505,6 +514,16 @@ const NovaPoints = () => {
             name: megaAttribute.name,
             value: megaAttribute.value,
             expValue: megaAttribute.expValue,
+        }));
+
+        const PowerDTOs = powers.map(power => ({
+            name: power.name,
+            value: power.value,
+            expValue: power.expValue,
+            level: power.level,
+            quantumMinimum: power.quantumMinimum,
+            hasExtra: power.hasExtra,
+            extraName: power.extraName,
         }));
 
         try {
@@ -910,6 +929,26 @@ const NovaPoints = () => {
                                         />
                                     </div>
                                     <div className='col-md-1 text-start'>{newPower.quantumMinimum}</div>
+                                </div>
+                                <div className='row'>
+                                    <div className='col-md-6 text-end'>
+                                        <label>Associated Attribute</label>
+                                    </div>
+                                    <div className='col-md-6 text-start'>
+                                        <select
+                                            name='attribute'
+                                            value={newPower.attribute}
+                                            onChange={handlePowerInputChange}
+                                            className='form-select'
+                                        >
+                                            <option value={null}>No Attribute</option>
+                                            {attributes.map(attr => (
+                                                <option key={attr.id} value={attr.id}>
+                                                    {attr.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className='text-center'>
                                     <div className='form-check-reverse form-check-inline'>
