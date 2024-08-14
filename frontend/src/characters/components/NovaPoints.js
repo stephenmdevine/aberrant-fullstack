@@ -96,10 +96,19 @@ const NovaPoints = () => {
     if (!gameChar) {
         return <div>Loading...</div>;
     }
+
     // Function to get attribute value by name
     const getAttributeValue = (attributeName) => {
         const attribute = attributes.find(attr => attr.name === attributeName);
         return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
+    };
+
+    const novaCost = (value) => {
+        if (!tainted) {
+            return value;
+        }   else {
+            return Math.ceil(value / 2);
+        }
     };
 
     //   // Ability specialty modal
@@ -265,12 +274,13 @@ const NovaPoints = () => {
 
     const handleQuantIncrement = () => {
         const totalValue = gameChar.quantumNova + 1;
-        if (totalValue < 10 && novaPoints >= 5) {
+        const cost = novaCost(5);
+        if (totalValue < 10 && novaPoints >= cost) {
             setGameChar(prevChar => ({
                 ...prevChar,
                 quantumNova: prevChar.quantumNova + 1
             }));
-            setNovaPoints(novaPoints - 5);
+            setNovaPoints(novaPoints - cost);
         }
     };
 
@@ -278,24 +288,30 @@ const NovaPoints = () => {
 
         const megaAttribute = megaAttributes[index];
         const maxValue = getAttributeValue(megaAttribute.name.slice(5));
+        const cost = novaCost(3);
 
-        if (megaAttribute.value < maxValue && novaPoints >= 3) {
+        if (megaAttribute.value < maxValue && novaPoints >= cost) {
             const newMegaAttributes = [...megaAttributes];
             newMegaAttributes[index].value += 1;
             setMegaAttributes(newMegaAttributes);
-            setNovaPoints(novaPoints - 3);
+            setNovaPoints(novaPoints - cost);
         }
     };
 
     const handlePowerIncrement = (index) => {
         const power = powers[index];
         const powerCost = (2 * (power.level + power.hasExtra - 1)) + 1;
+        const cost = novaCost(powerCost);
 
-        if (power.value < 5 && novaPoints >= powerCost) {
+        if (power.value < 5 && novaPoints >= cost) {
             const newPowers = [...powers];
-            newPowers[index].value += 1;
+            if (power.level + power.hasExtra === 1 && tainted) {
+                newPowers[index].value += 2;
+            }   else {
+                newPowers[index].value += 1;
+            }
             setPowers(newPowers);
-            setNovaPoints(novaPoints - powerCost);
+            setNovaPoints(novaPoints - cost);
         }
     };
 
@@ -374,35 +390,43 @@ const NovaPoints = () => {
     };
 
     const handleQuantDecrement = () => {
+        const cost = novaCost(5);
+
         if (gameChar.quantumNova > 0) {
             setGameChar(prevChar => ({
                 ...prevChar,
                 quantumNova: prevChar.quantumNova - 1
             }));
-            setNovaPoints(novaPoints + 5);
+            setNovaPoints(novaPoints + cost);
         }
     };
 
     const handleMegaAttrDecrement = (index) => {
         const megaAttribute = megaAttributes[index];
+        const cost = novaCost(3);
 
         if (megaAttribute.value > 0) {
             const newMegaAttributes = [...megaAttributes];
             newMegaAttributes[index].value -= 1;
             setMegaAttributes(newMegaAttributes);
-            setNovaPoints(novaPoints + 3);
+            setNovaPoints(novaPoints + cost);
         }
     };
 
     const handlePowerDecrement = (index) => {
         const power = powers[index];
         const powerCost = (2 * (power.level + power.hasExtra - 1)) + 1;
+        const cost = novaCost(powerCost);
 
         if (power.value > 0) {
             const newPowers = [...powers];
-            newPowers[index].value -= 1;
+            if (power.level + power.hasExtra === 1 && tainted) {
+                newPowers[index].value -= 2;
+            }   else {
+                newPowers[index].value -= 1;
+            }
             setPowers(newPowers);
-            setNovaPoints(novaPoints + powerCost);
+            setNovaPoints(novaPoints + cost);
         }
     };
 
@@ -432,52 +456,6 @@ const NovaPoints = () => {
     //       }
     //     }
     //   };
-
-    const handleEnhancementSubmit = async () => {
-
-    };
-
-    // const handlePowerInputChange = (e) => {
-    //     const { name, value, type, checked } = e.target;
-
-    //     if (name === 'level' && value === '3') {
-    //         setNewPower({
-    //             ...newPower,
-    //             level: value,
-    //             hasExtra: false
-    //         });
-    //     } else {
-    //         setNewPower({
-    //             ...newPower,
-    //             [name]: type === 'checkbox' ? checked : value
-    //         });
-    //     }
-    // };
-
-    // const handleAddPower = async (e) => {
-    //     e.preventDefault();
-    //     console.log("Power save initiated...");
-
-    //     try {
-    //         const response = await axios.post(`http://localhost:8080/api/powers/${id}`, newPower);
-    //         console.log(newPower.name + " saved.");
-    //         const updatedPowers = [...powers, response.data];
-    //         setPowers(updatedPowers);
-    //     } catch (error) {
-    //         console.error('Error saving power:', error);
-    //     }
-
-    //     setNewPower({
-    //         name: "",
-    //         value: 1,
-    //         expValue: 0,
-    //         level: 1,
-    //         quantumMinimum: 1,
-    //         hasExtra: false,
-    //         extraName: "",
-    //         attributeId: null,
-    //     });
-    // };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -843,6 +821,7 @@ const NovaPoints = () => {
                                                     megaAttributeId={megaAttribute.id}
                                                     novaPoints={novaPoints}
                                                     setNovaPoints={setNovaPoints}
+                                                    tainted={tainted}
                                                 />
 
                                             )}
@@ -902,116 +881,8 @@ const NovaPoints = () => {
                             novaPoints={novaPoints}
                             setNovaPoints={setNovaPoints}
                             id={id}
+                            tainted={tainted}
                         />
-                        {/* <Container className='border rounded col-md-6'> attributes, powers, setPowers, novaPoints, setNovaPoints, id
-                            <h4>New Power</h4>
-                            <form onSubmit={handleAddPower}>
-                                <div className='row'>
-                                    <div className='col-md-6 text-end'>
-                                        <label>Power Name</label>
-                                    </div>
-                                    <div className='col-md-6 text-start'>
-                                        <input
-                                            type='text'
-                                            className='form-control'
-                                            placeholder='power name'
-                                            name='name'
-                                            value={newPower.name}
-                                            onChange={handlePowerInputChange}
-                                        />
-                                    </div>
-                                </div>
-                                <div className='row'>
-                                    <div className='col-md-6 text-end'>
-                                        <label>Base Power Level (with no extras)</label>
-                                    </div>
-                                    <div className='col-md-3 text-start'>
-                                        <input
-                                            type="range"
-                                            min={1}
-                                            max={3}
-                                            className="form-range"
-                                            name='level'
-                                            value={newPower.level}
-                                            onChange={handlePowerInputChange}
-                                        />
-                                    </div>
-                                    <div className='col-md-1 text-start'>{newPower.level}</div>
-                                </div>
-                                <div className='row'>
-                                    <div className='col-md-6 text-end'>
-                                        <label>Minimum Quantum</label>
-                                    </div>
-                                    <div className='col-md-5 text-start'>
-                                        <input
-                                            type="range"
-                                            min={1}
-                                            max={5}
-                                            className="form-range"
-                                            name='quantumMinimum'
-                                            value={newPower.quantumMinimum}
-                                            onChange={handlePowerInputChange}
-                                        />
-                                    </div>
-                                    <div className='col-md-1 text-start'>{newPower.quantumMinimum}</div>
-                                </div>
-                                <div className='row'>
-                                    <div className='col-md-6 text-end'>
-                                        <label>Associated Attribute</label>
-                                    </div>
-                                    <div className='col-md-6 text-start'>
-                                        <select
-                                            name='attribute'
-                                            value={newPower.attributeId}
-                                            onChange={handlePowerInputChange}
-                                            className='form-select'
-                                        >
-                                            <option value={null}>No Attribute</option>
-                                            {attributes.map(attr => (
-                                                <option key={attr.id} value={attr.id}>
-                                                    {attr.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className='text-center'>
-                                    <div className='form-check-reverse form-check-inline'>
-                                        <input
-                                            className='form-check-input'
-                                            type='checkbox'
-                                            name='hasExtra'
-                                            id='hasExtra'
-                                            checked={newPower.hasExtra}
-                                            onChange={handlePowerInputChange}
-                                        />
-                                        <label className='form-check-label' htmlFor='hasExtra'>
-                                            Extra
-                                        </label>
-                                    </div>
-                                </div>
-                                {newPower.hasExtra && (
-                                    <div className='row'>
-                                        <div className='col-md-6 text-end'>
-                                            <label>Extra Name</label>
-                                        </div>
-                                        <div className='col-md-6 text-start'>
-                                            <input
-                                                type='text'
-                                                className='form-control'
-                                                placeholder='extra name'
-                                                name='extraName'
-                                                value={newPower.extraName}
-                                                onChange={handlePowerInputChange}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="d-flex justify-content-center my-4">
-                                    <Button className="btn btn-primary me-2" type='submit'>Add This Power</Button>
-                                </div>
-                            </form>
-                        </Container> */}
                     </section>
 
                     {/* Flaws Section */}
@@ -1225,7 +1096,7 @@ const QualityManager = ({ attributeId }) => {
 
 
 
-const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
+const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainted }) => {
     // State to hold the quality name entered by the user
     const [enhancementName, setEnhancementName] = useState('');
     // State to hold the existing quality name (if any) for placeholder
@@ -1245,6 +1116,14 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
         fetchEnhancements();
     }, [megaAttributeId]);
 
+    const novaCost = (value) => {
+        if (!tainted) {
+            return value;
+        }   else {
+            return Math.ceil(value / 2);
+        }
+    };
+
     // Handle input changes
     const handleEnhancementChange = (event) => {
         setEnhancementName(event.target.value);
@@ -1252,7 +1131,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
 
     // Save or update the quality
     const saveEnhancement = async () => {
-        const enhancementCost = existingEnhancements.length > 0 ? 3 : 0;
+        const enhancementCost = existingEnhancements.length > 0 ? novaCost(3) : 0;
 
         if (novaPoints < enhancementCost) {
             alert('Not enough nova points');
@@ -1272,7 +1151,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
     };
 
     const handleDeleteEnhancement = async (megaAttributeId, enhancementId) => {
-        const enhancementCostReturn = existingEnhancements.length > 1 ? 3 : 0;
+        const enhancementCostReturn = existingEnhancements.length > 1 ? novaCost(3) : 0;
 
         try {
             const response = await axios.delete(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements/${enhancementId}`);
@@ -1320,7 +1199,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints }) => {
 
 
 
-const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoints, id }) => {
+const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoints, id, tainted }) => {
 
     const [newPower, setNewPower] = useState({
         name: "",
@@ -1332,6 +1211,14 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
         extraName: "",
         attributeId: 0
     });
+
+    const novaCost = (value) => {
+        if (!tainted) {
+            return value;
+        }   else {
+            return Math.ceil(value / 2);
+        }
+    };
 
     const handlePowerInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -1356,8 +1243,13 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
         console.log(newPower.attributeId);
 
         const powerCost = (2 * (newPower.level + newPower.hasExtra - 1)) + 1;
+        const cost = novaCost(powerCost);
 
-        if (novaPoints < powerCost) {
+        if (newPower.level + newPower.hasExtra === 1 && tainted) {
+            newPower.value = 2;
+        }
+
+        if (novaPoints < cost) {
             alert('Not enough nova points');
             return;
         }
@@ -1367,7 +1259,7 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
             console.log(newPower.name + " saved.");
             const updatedPowers = [...powers, response.data];
             setPowers(updatedPowers);
-            setNovaPoints(novaPoints - powerCost);
+            setNovaPoints(novaPoints - cost);
         } catch (error) {
             console.error('Error saving power:', error);
         }
@@ -1386,7 +1278,7 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
 
     return (
         <Container className='border rounded col-md-6'>
-            <h4>New Power</h4>
+            <h2>New Power</h2>
             <div className='row'>
                 <div className='col-md-6 text-end'>
                     <label>Power Name</label>
