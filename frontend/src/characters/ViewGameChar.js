@@ -43,18 +43,24 @@ export default function ViewGameChar() {
     // Function to get attribute value by name
     const getAttributeValue = (attributeName) => {
         const attribute = attributes.find(attr => attr.name === attributeName);
-        return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
+        return attribute ? (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) : 0;
+    };
+
+    const getMegaAttributeValue = (megaAttributeName) => {
+        const megaAttribute = megaAttributes.find(attr => attr.name === megaAttributeName);
+        return megaAttribute ? (megaAttribute.value + megaAttribute.expValue) : 0;
     };
 
     // Calculate initiative
     const dexterityValue = getAttributeValue('Dexterity');
     const witsValue = getAttributeValue('Wits');
     const staminaValue = getAttributeValue('Stamina');
+    const megaStaminaValue = getMegaAttributeValue('Mega-Stamina');
     const initiative = dexterityValue + witsValue + gameChar.initiativeBonus;
     const run = dexterityValue + 12;
     const sprint = (dexterityValue * 3) + 20;
-    const bashing = staminaValue;
-    const lethal = Math.floor(staminaValue / 2);
+    const bashing = staminaValue + megaStaminaValue;
+    const lethal = Math.floor(staminaValue / 2) + Math.ceil(megaStaminaValue / 2);
 
     return (
         <div className='container'>
@@ -83,6 +89,15 @@ export default function ViewGameChar() {
                                 <li className='list-group-item'><b>Experience: </b>{gameChar.experiencePoints}</li>
                             </ul>
                             </Col> */}
+                        </Row>
+                        <Row>
+                            <h4>Experience</h4>
+                            <Col style={{ textAlign: 'right' }}>
+                                Earned: {gameChar.experiencePoints}
+                            </Col>
+                            <Col style={{ textAlign: 'left' }}>
+                                Spent: {gameChar.expSpent}
+                            </Col>
                         </Row>
                     </Container>
 
@@ -156,13 +171,13 @@ export default function ViewGameChar() {
                                                         {megaAttribute.enhancements && megaAttribute.enhancements.length > 0 && (
                                                             <div>
                                                                 <h5 className='pt-2'>Enhancements</h5>
-                                                            <ul className='list-group'>
-                                                                {megaAttribute.enhancements.map((enhancement, enhIndex) => (
-                                                                    <li key={enhIndex} className='list-group-item'>
-                                                                        {enhancement.name}
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
+                                                                <ul className='list-group'>
+                                                                    {megaAttribute.enhancements.map((enhancement, enhIndex) => (
+                                                                        <li key={enhIndex} className='list-group-item'>
+                                                                            {enhancement.name}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
                                                             </div>
                                                         )}
                                                     </div>
@@ -182,6 +197,38 @@ export default function ViewGameChar() {
                             </Col>
                             <Col sm={4}>
                                 <h3>Quantum Powers</h3>
+                                <ListGroup className='mb-3'>
+                                    {powers.map((power, powerIndex) => (
+                                        <ListGroup.Item key={powerIndex}>
+                                            <Container>
+                                                <Row>
+                                                    <h4>{power.name}</h4>
+                                                </Row>
+                                                <Row>
+                                                    <Col>
+                                                        <div className="btn-toolbar justify-content-center" role="toolbar">
+                                                            <h4 className='me-2'><SymbolDisplay value={power.value} /></h4>
+                                                        </div>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col><b>Level:</b> {power.level}</Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col><b>Quantum Minimum:</b> {power.quantumMinimum}</Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col><b>Dice Pool:</b> {power.attrName} + {power.name} ({power.attrValue + power.value})</Col>
+                                                </Row>
+                                                {power.hasExtra && (
+                                                    <Row>
+                                                        <Col><b>Extra:</b> {power.extraName}</Col>
+                                                    </Row>
+                                                )}
+                                            </Container>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
                                 <h3 className='pt-4'>Merits</h3>
                                 <ListGroup className='mb-3'>
                                     {merits.map((merit, index) => (

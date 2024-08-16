@@ -29,7 +29,7 @@ const AttributeDisplay = ({ attribute, abilities }) => {
                 <div className='col-md-6 text-start'>
                     <h3 className='pt-4'><SymbolDisplay value={attribute.value + attribute.bonusValue + attribute.novaValue}/></h3>
                 </div>
-                <h4>{quality}</h4>
+                <h4 className='gray-color'>{quality}</h4>
             </div>
             <ul className='list-group'>
                 {attrAbilities.map((ability, index) => (
