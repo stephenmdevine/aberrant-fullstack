@@ -12,7 +12,7 @@ import AddAbilities from './characters/AddAbilities';
 import AddBackgrounds from './characters/components/AddBackgrounds';
 import BonusPoints from './characters/BonusPoints';
 import NovaPoints from './characters/components/NovaPoints';
-import ExperiencePoints from './characters/components/ExpreiencePoints';
+import ExperiencePoints from './characters/components/ExperiencePoints';
 
 function App() {
   return (

@@ -7,53 +7,23 @@ import SymbolDisplay from './SymbolDisplay';
 const NovaPoints = () => {
     const [gameChar, setGameChar] = useState({});
     const [attributes, setAttributes] = useState([]);
-    const [attributesNovaPurchased, setAttributesNovaPurchased] = useState(0);
     const [abilities, setAbilities] = useState([]);
-    const [abilitiesNovaPurchased, setAbilitiesNovaPurchased] = useState(0);
     const [backgrounds, setBackgrounds] = useState([]);
-    const [backgroundsNovaPurchased, setBackgroundsNovaPurchased] = useState(0);
-    //   const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
-    //   const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
-    //   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
     const [bonusPoints, setBonusPoints] = useState(0);
     const [novaPoints, setNovaPoints] = useState(0);
+    const [expPoints, setExpPoints] = useState(0);
+    const [expSpent, setExpSpent] = useState(0);
     const [taint, setTaint] = useState(0);
     const [tainted, setTainted] = useState(false);
     // State for flaws and merits
     const [flaws, setFlaws] = useState([]);
     const [merits, setMerits] = useState([]);
-    //   const [newFlaw, setNewFlaw] = useState({ name: '', value: 0 });
-    //   const [newMerit, setNewMerit] = useState({ name: '', value: 0 });
     // State for Nova characteristics
     const [megaAttributes, setMegaAttributes] = useState([]);
     const [powers, setPowers] = useState([]);
-    // const [newPower, setNewPower] = useState({
-    //     name: "",
-    //     value: 1,
-    //     expValue: 0,
-    //     level: 1,
-    //     quantumMinimum: 1,
-    //     hasExtra: false,
-    //     extraName: "",
-    //     attributeId: null
-    // });
-    const [powerLevel, setPowerLevel] = useState(1);
-    const [powerQMin, setPowerQMin] = useState(1);
-    const [powerHasExtra, setPowerHasExtra] = useState(false);
 
     const { id } = useParams();
     const navigate = useNavigate();
-
-    //   // Function to get attribute value by name
-    //   const getAttributeValue = (attributeName) => {
-    //     const attribute = attributes.find(attr => attr.name === attributeName);
-    //     return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
-    //   };
-
-    //   // Calculate initiative
-    //   const dexterityValue = getAttributeValue('Dexterity');
-    //   const witsValue = getAttributeValue('Wits');
-    //   const initiative = dexterityValue + witsValue + gameChar.initiativeBonus;
 
     useEffect(() => {
         loadGameChar();
@@ -61,7 +31,6 @@ const NovaPoints = () => {
 
     useEffect(() => {
         // Update the Nova Points spent and free increases on attribute changes
-        //   calculateAttrNovaPointsSpent();
         calculateFreeAttrIncreases();
     }, [attributes]);
     useEffect(() => {
@@ -83,6 +52,8 @@ const NovaPoints = () => {
             setBackgrounds(result.data.backgrounds);
             setBonusPoints(result.data.bonusPoints);
             setNovaPoints(result.data.novaPoints);
+            setExpPoints(result.data.experiencePoints);
+            setExpSpent(result.data.expSpent);
             setTaint(result.data.taint);
             setFlaws(result.data.flaws);
             setMerits(result.data.merits);
@@ -111,61 +82,6 @@ const NovaPoints = () => {
         }
     };
 
-    //   // Ability specialty modal
-    //   const handleSpecialtyModalShow = (abilityId) => {
-    //     if (bonusPoints > 0) {
-    //       setSelectedAbilityId(abilityId);
-    //       setShowSpecialtyModal(true);
-    //     } else {
-    //       alert('You do not have enough bonus points to add a new specialty.');
-    //     }
-    //   };
-
-    //   const handleSpecialtyModalClose = () => {
-    //     setShowSpecialtyModal(false);
-    //     setNewSpecialty({ name: '', value: 0 });
-    //     setSelectedAbilityId(null);
-    //   };
-
-    //   const handleSpecialtyInputChange = (e) => {
-    //     const { name, value } = e.target;
-    //     setNewSpecialty({ ...newSpecialty, [name]: value });
-    //   };
-
-    //   // Handle flaw/merit form changes
-    //   const handleFlawChange = (e) => setNewFlaw({ ...newFlaw, [e.target.name]: e.target.value });
-    //   const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
-
-    //   // Handle flaw/merit form submissions
-    //   const handleAddFlaw = async () => {
-    //     const flawValue = parseInt(newFlaw.value, 10);
-    //     const flawData = { ...newFlaw, gameCharId: id };
-
-    //     try {
-    //       await axios.post(`http://localhost:8080/${id}/flaws`, flawData);
-    //       setFlaws([...flaws, flawData]);
-    //       setNewFlaw({ name: '', value: 0 });
-    //       setBonusPoints(bonusPoints + flawValue);
-    //     } catch (error) {
-    //       console.error('Error adding flaw: ', error);
-    //     }
-    //   };
-    //   const handleAddMerit = async () => {
-    //     const meritValue = parseInt(newMerit.value, 10);
-    //     const meritData = { ...newMerit, gameCharId: id };
-
-    //     if (bonusPoints >= meritValue) {
-    //       try {
-    //         await axios.post(`http://localhost:8080/${id}/merits`, meritData);
-    //         setMerits([...merits, newMerit]);
-    //         setNewMerit({ name: '', value: 0 });
-    //         setBonusPoints(bonusPoints - meritValue);
-    //       } catch (error) {
-    //         console.log('Error adding merit: ', error);
-    //       }
-    //     }
-    //   };
-
     const calculateTotalAttrNovaValue = () => {
         return attributes.reduce((sum, attr) => sum + attr.novaValue, 0);
     };
@@ -175,11 +91,6 @@ const NovaPoints = () => {
     const calculateTotalBkgrNovaValue = () => {
         return backgrounds.reduce((sum, attr) => sum + attr.novaValue, 0);
     };
-
-    // const calculateAttrNovaPointsSpent = () => {
-    //     const totalNovaValue = calculateTotalAttrNovaValue();
-    //     return Math.ceil(totalNovaValue / 3);
-    // };
 
     const calculateFreeAttrIncreases = () => {
         const totalNovaValue = calculateTotalAttrNovaValue();
@@ -315,16 +226,6 @@ const NovaPoints = () => {
         }
     };
 
-    //   const handleInitIncrement = () => {
-    //     if (bonusPoints >= 1) {
-    //       setGameChar(prevChar => ({
-    //         ...prevChar,
-    //         initiativeBonus: prevChar.initiativeBonus + 1
-    //       }));
-    //       setBonusPoints(bonusPoints - 1);
-    //     }
-    //   };
-
     const handleAttrDecrement = (index) => {
         const attribute = attributes[index];
 
@@ -430,44 +331,8 @@ const NovaPoints = () => {
         }
     };
 
-    //   const handleInitDecrement = () => {
-    //     if (gameChar.initiativeBonus > 0) {
-    //       setGameChar(prevChar => ({
-    //         ...prevChar,
-    //         initiativeBonus: prevChar.initiativeBonus - 1
-    //       }));
-    //       setBonusPoints(bonusPoints + 1);
-    //     }
-    //   };
-
-    //   const handleSpecialtySubmit = async () => {
-    //     if (selectedAbilityId) {
-    //       try {
-    //         const response = await axios.post(`http://localhost:8080/api/specialties/ability/${selectedAbilityId}`, newSpecialty);
-    //         setAbilities((prevAbilities) =>
-    //           prevAbilities.map((ability) =>
-    //             ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
-    //           )
-    //         );
-    //         setBonusPoints(bonusPoints - 1);
-    //         handleSpecialtyModalClose();
-    //       } catch (error) {
-    //         console.error('Error adding specialty:', error);
-    //       }
-    //     }
-    //   };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const gameCharUpdateData = {
-            // Include all the necessary fields and lists from your state
-            bonusPoints: bonusPoints,
-            novaPoints: novaPoints,
-            willpowerNova: gameChar.willpowerNova,
-            quantumNova: gameChar.quantumNova,
-            taint: gameChar.taint,
-        };
 
         const attributeDTOs = attributes.map(attribute => ({
             name: attribute.name,
@@ -526,6 +391,8 @@ const NovaPoints = () => {
                 axios.put(`http://localhost:8080/character/${id}`, {
                     bonusPoints: bonusPoints,
                     novaPoints: novaPoints,
+                    experiencePoints: expPoints,
+                    expSpent: expSpent,
                     baseTaint: gameChar.baseTaint,
                     taint: gameChar.taint,
                     willpowerBonus: gameChar.willpowerBonus,
@@ -542,44 +409,6 @@ const NovaPoints = () => {
             console.error('Error updating character:', error);
         }
     };
-
-    //   const handleSpecialtyDelete = async (specialtyId, abilityId) => {
-    //     try {
-    //       await axios.delete(`http://localhost:8080/api/specialties/${specialtyId}`);
-    //       setAbilities((prevAbilities) =>
-    //         prevAbilities.map((ability) =>
-    //           ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
-    //         )
-    //       );
-    //       setBonusPoints(bonusPoints + 1);
-    //     } catch (error) {
-    //       console.error('Error deleting specialty:', error);
-    //     }
-    //   };
-
-    //   const handleFlawDelete = async (flawId, flawValue) => {
-    //     try {
-    //       await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
-    //       setFlaws((prevFlaws) =>
-    //         prevFlaws.filter((flaw) => flaw.id !== flawId)
-    //       );
-    //       setBonusPoints(bonusPoints - parseInt(flawValue, 10));
-    //     } catch (error) {
-    //       console.error('Error deleting flaw:', error);
-    //     }
-    //   };
-
-    //   const handleMeritDelete = async (meritId, meritValue) => {
-    //     try {
-    //       await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
-    //       setMerits((prevMerits) =>
-    //         prevMerits.filter((merit) => merit.id !== meritId)
-    //       );
-    //       setBonusPoints(bonusPoints + parseInt(meritValue, 10));
-    //     } catch (error) {
-    //       console.error('Error deleting merit:', error);
-    //     }
-    //   };
 
     return (
         <Container fluid>
@@ -668,21 +497,10 @@ const NovaPoints = () => {
                                                                     <li key={specIndex} className='list-group-item'>
                                                                         <div>
                                                                             <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + 1} max={6} /></span>
-                                                                            {/* <Button
-                                                                            className='ms-2'
-                                                                            variant="danger"
-                                                                            size="sm"
-                                                                            onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
-                                                                        >
-                                                                            x
-                                                                        </Button> */}
                                                                         </div>
                                                                     </li>
                                                                 ))}
                                                             </ul>
-                                                            {/* {ability.specialties.length < 3 && (
-                                                            <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
-                                                            )} */}
                                                         </div>
                                                     </li>
                                                 ))}
@@ -765,26 +583,6 @@ const NovaPoints = () => {
                                     </div>
                                 </div>
                             </li>
-                            {/* <li className='list-group-item'>
-                                <div className='row'>
-                                    <div className='col-md-6 text-end'>
-                                        Initiative
-                                    </div>
-                                    <div className='col-md-6 text-start'>
-                                        <span className='me-3'>
-                                            {initiative}
-                                        </span>
-                                        <ButtonGroup className='border rounded shadow'>
-                                            <Button variant="light" size='sm' onClick={handleInitDecrement}>
-                                                <i className="bi bi-dash-square"></i>
-                                            </Button>
-                                            <Button variant="primary" size='sm' onClick={handleInitIncrement}>
-                                                <i className="bi bi-plus-square"></i>
-                                            </Button>
-                                        </ButtonGroup>
-                                    </div>
-                                </div>
-                            </li> */}
                         </ul>
                     </section>
 
@@ -885,99 +683,6 @@ const NovaPoints = () => {
                         />
                     </section>
 
-                    {/* Flaws Section */}
-                    {/* <section className='flaws-section my-4'>
-                        <h3>Flaws</h3>
-                        <ListGroup className='mb-3'>
-                            {flaws.map((flaw, index) => (
-                                <ListGroup.Item key={index}>
-                                    {flaw.name} <span className='badge bg-warning'>{flaw.value}</span>
-                                    <Button
-                                        className='ms-2'
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleFlawDelete(flaw.id, flaw.value)}
-                                    >
-                                        x
-                                    </Button>
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
-                        <Form>
-                            <Row>
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        placeholder="Flaw Name"
-                                        value={newFlaw.name}
-                                        onChange={handleFlawChange}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form.Control
-                                        type="number"
-                                        name="value"
-                                        placeholder="Value"
-                                        value={newFlaw.value}
-                                        onChange={handleFlawChange}
-                                        min={1}
-                                        max={7}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button variant="primary" onClick={handleAddFlaw}>Add Flaw</Button>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </section> */}
-
-                    {/* Merits Section */}
-                    {/* <section className='merits-section my-4'>
-                        <h3>Merits</h3>
-                        <ListGroup className='mb-3'>
-                            {merits.map((merit, index) => (
-                                <ListGroup.Item key={index}>
-                                    {merit.name} <span className='badge bg-primary'>{merit.value}</span>
-                                    <Button
-                                        className='ms-2'
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleMeritDelete(merit.id, merit.value)}
-                                    >
-                                        x
-                                    </Button>
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
-                        <Form>
-                            <Row>
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        placeholder="Merit Name"
-                                        value={newMerit.name}
-                                        onChange={handleMeritChange}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form.Control
-                                        type="number"
-                                        name="value"
-                                        placeholder="Value"
-                                        value={newMerit.value}
-                                        onChange={handleMeritChange}
-                                        min={1}
-                                        max={7}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button variant="primary" onClick={handleAddMerit}>Add Merit</Button>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </section> */}
                     {/* Submit and Cancel Buttons */}
                     <div className="d-flex justify-content-center my-4">
                         <Button className="btn btn-primary me-2" type="submit">Submit</Button>
@@ -985,33 +690,6 @@ const NovaPoints = () => {
                     </div>
                 </form>
             </main>
-            {/* Specialty Modal */}
-            {/* <Modal show={showSpecialtyModal} onHide={handleSpecialtyModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Specialty</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type='text'
-                name='name'
-                value={newSpecialty.name}
-                onChange={handleSpecialtyInputChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={handleSpecialtyModalClose}>
-            Close
-          </Button>
-          <Button variant='primary' onClick={handleSpecialtySubmit}>
-            Add Specialty
-          </Button>
-        </Modal.Footer>
-      </Modal> */}
         </Container>
     );
 };

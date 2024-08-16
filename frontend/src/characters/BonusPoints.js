@@ -14,6 +14,8 @@ const BonusPoints = () => {
   const [selectedAbilityId, setSelectedAbilityId] = useState(null);
   const [bonusPoints, setBonusPoints] = useState(0);
   const [novaPoints, setNovaPoints] = useState(0);
+  const [expPoints, setExpPoints] = useState(0);
+  const [expSpent, setExpSpent] = useState(0);
   const [baseTaint, setBaseTaint] = useState(0);
   const [taint, setTaint] = useState(0);
   // State for flaws and merits
@@ -60,6 +62,8 @@ const BonusPoints = () => {
       setBackgrounds(result.data.backgrounds);
       setBonusPoints(result.data.bonusPoints);
       setNovaPoints(result.data.novaPoints);
+      setExpPoints(result.data.experiencePoints);
+      setExpSpent(result.data.expSpent);
       setBaseTaint(result.data.baseTaint);
       setTaint(result.data.taint);
       setFlaws(result.data.flaws);
@@ -341,6 +345,8 @@ const BonusPoints = () => {
             axios.put(`http://localhost:8080/character/${id}`, {
               bonusPoints: bonusPoints,
               novaPoints: novaPoints,
+              experiencePoints: expPoints,
+              expSpent: expSpent,
               baseTaint: baseTaint,
               taint: taint,
               willpowerBonus: gameChar.willpowerBonus,
