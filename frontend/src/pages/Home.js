@@ -53,7 +53,7 @@ export default function Home() {
                 </td>
                 <td>
                   <Link className='btn btn-primary mx-1' to={`/viewCharacter/${gameChar.id}`}>View Character</Link>
-                  <Link className='btn btn-primary mx-1' to={'/'}>Spend Experience</Link>
+                  <Link className='btn btn-primary mx-1' to={`/spendExperiencePoints/${gameChar.id}`}>Spend Experience</Link>
                 </td>
                 <td>
                   <button className='btn btn-danger mx-1' onClick={() => deleteGameChar(gameChar.id)}>Delete</button>

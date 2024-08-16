@@ -12,6 +12,7 @@ import AddAbilities from './characters/AddAbilities';
 import AddBackgrounds from './characters/components/AddBackgrounds';
 import BonusPoints from './characters/BonusPoints';
 import NovaPoints from './characters/components/NovaPoints';
+import ExperiencePoints from './characters/components/ExpreiencePoints';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route exact path='/addBackgrounds/:id' element={<AddBackgrounds />} />
           <Route exact path='/spendBonusPoints/:id' element={<BonusPoints />} />
           <Route exact path='/spendNovaPoints/:id' element={<NovaPoints />} />
+          <Route exact path='/spendExperiencePoints/:id' element={<ExperiencePoints />} />
         </Routes>
       </Router>
     </div>
