@@ -9,9 +9,10 @@ const ExperiencePoints = () => {
     const [attributes, setAttributes] = useState([]);
     const [abilities, setAbilities] = useState([]);
     const [backgrounds, setBackgrounds] = useState([]);
-      const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
-      const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
-      const [selectedAbilityId, setSelectedAbilityId] = useState(null);
+    const [showSpecialtyModal, setShowSpecialtyModal] = useState(false);
+    const [newSpecialty, setNewSpecialty] = useState({ name: '', value: 0 });
+    const [selectedAbilityId, setSelectedAbilityId] = useState(null);
+
     const [bonusPoints, setBonusPoints] = useState(0);
     const [novaPoints, setNovaPoints] = useState(0);
     const [expPoints, setExpPoints] = useState(0);
@@ -19,11 +20,11 @@ const ExperiencePoints = () => {
     const [freeExp, setFreeExp] = useState(0);
     const [taint, setTaint] = useState(0);
     const [tainted, setTainted] = useState(false);
-    // State for flaws and merits
-    const [flaws, setFlaws] = useState([]);
-    const [merits, setMerits] = useState([]);
-      const [newFlaw, setNewFlaw] = useState({ name: '', value: 0 });
-      const [newMerit, setNewMerit] = useState({ name: '', value: 0 });
+    // // State for flaws and merits
+    // const [flaws, setFlaws] = useState([]);
+    // const [merits, setMerits] = useState([]);
+    // const [newFlaw, setNewFlaw] = useState({ name: '', value: 0 });
+    // const [newMerit, setNewMerit] = useState({ name: '', value: 0 });
     // State for Nova characteristics
     const [megaAttributes, setMegaAttributes] = useState([]);
     const [powers, setPowers] = useState([]);
@@ -32,32 +33,32 @@ const ExperiencePoints = () => {
     const navigate = useNavigate();
 
     //   // Function to get attribute value by name
-      const getAttributeValue = (attributeName) => {
+    const getAttributeValue = (attributeName) => {
         const attribute = attributes.find(attr => attr.name === attributeName);
-        return attribute ? attribute.value : 0; // Return 0 if the attribute is not found
-      };
+        return attribute ? (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) : 0; // Return 0 if the attribute is not found
+    };
 
     //   // Calculate initiative
-      const dexterityValue = getAttributeValue('Dexterity');
-      const witsValue = getAttributeValue('Wits');
-      const initiative = dexterityValue + witsValue + gameChar.initiativeBonus;
+    const dexterityValue = getAttributeValue('Dexterity');
+    const witsValue = getAttributeValue('Wits');
+    const initiative = dexterityValue + witsValue + gameChar.initiativeBonus + gameChar.initiativeExp;
 
     useEffect(() => {
         loadGameChar();
     }, []);
 
-    useEffect(() => {
-        // Update the Nova Points spent and free increases on attribute changes
-        calculateFreeAttrIncreases();
-    }, [attributes]);
-    useEffect(() => {
-        // Update the Nova Points spent and free increases on ability changes
-        calculateFreeAbilIncreases();
-    }, [abilities]);
-    useEffect(() => {
-        // Update the Nova Points spent and free increases on ability changes
-        calculateFreeBkgrIncreases();
-    }, [backgrounds]);
+    // useEffect(() => {
+    //     // Update the Nova Points spent and free increases on attribute changes
+    //     calculateFreeAttrIncreases();
+    // }, [attributes]);
+    // useEffect(() => {
+    //     // Update the Nova Points spent and free increases on ability changes
+    //     calculateFreeAbilIncreases();
+    // }, [abilities]);
+    // useEffect(() => {
+    //     // Update the Nova Points spent and free increases on ability changes
+    //     calculateFreeBkgrIncreases();
+    // }, [backgrounds]);
 
     // Load all game character details
     const loadGameChar = async () => {
@@ -72,8 +73,8 @@ const ExperiencePoints = () => {
             setExpPoints(result.data.experiencePoints);
             setExpSpent(result.data.expSpent);
             setTaint(result.data.taint);
-            setFlaws(result.data.flaws);
-            setMerits(result.data.merits);
+            // setFlaws(result.data.flaws);
+            // setMerits(result.data.merits);
             setMegaAttributes(result.data.megaAttributes);
             setPowers(result.data.powers);
             setFreeExp(parseInt(expPoints - expSpent));
@@ -86,167 +87,174 @@ const ExperiencePoints = () => {
         return <div>Loading...</div>;
     }
 
-    const novaCost = (value) => {
+    const expCost = (value) => {
         if (!tainted) {
             return value;
-        }   else {
+        } else {
             return Math.ceil(value / 2);
         }
     };
 
     //   // Ability specialty modal
-      const handleSpecialtyModalShow = (abilityId) => {
+    const handleSpecialtyModalShow = (abilityId) => {
         if (bonusPoints > 0) {
-          setSelectedAbilityId(abilityId);
-          setShowSpecialtyModal(true);
+            setSelectedAbilityId(abilityId);
+            setShowSpecialtyModal(true);
         } else {
-          alert('You do not have enough bonus points to add a new specialty.');
+            alert('You do not have enough bonus points to add a new specialty.');
         }
-      };
+    };
 
-      const handleSpecialtyModalClose = () => {
+    const handleSpecialtyModalClose = () => {
         setShowSpecialtyModal(false);
         setNewSpecialty({ name: '', value: 0 });
         setSelectedAbilityId(null);
-      };
+    };
 
-      const handleSpecialtyInputChange = (e) => {
+    const handleSpecialtyInputChange = (e) => {
         const { name, value } = e.target;
         setNewSpecialty({ ...newSpecialty, [name]: value });
-      };
+    };
 
     //   // Handle flaw/merit form changes
-      const handleFlawChange = (e) => setNewFlaw({ ...newFlaw, [e.target.name]: e.target.value });
-      const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
+    // const handleFlawChange = (e) => setNewFlaw({ ...newFlaw, [e.target.name]: e.target.value });
+    // const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
 
     //   // Handle flaw/merit form submissions
-      const handleAddFlaw = async () => {
-        const flawValue = parseInt(newFlaw.value, 10);
-        const flawData = { ...newFlaw, gameCharId: id };
+    // const handleAddFlaw = async () => {
+    //     const flawValue = parseInt(newFlaw.value, 10);
+    //     const flawData = { ...newFlaw, gameCharId: id };
 
-        try {
-          await axios.post(`http://localhost:8080/${id}/flaws`, flawData);
-          setFlaws([...flaws, flawData]);
-          setNewFlaw({ name: '', value: 0 });
-          setBonusPoints(bonusPoints + flawValue);
-        } catch (error) {
-          console.error('Error adding flaw: ', error);
-        }
-      };
-      const handleAddMerit = async () => {
-        const meritValue = parseInt(newMerit.value, 10);
-        const meritData = { ...newMerit, gameCharId: id };
+    //     try {
+    //         await axios.post(`http://localhost:8080/${id}/flaws`, flawData);
+    //         setFlaws([...flaws, flawData]);
+    //         setNewFlaw({ name: '', value: 0 });
+    //         setBonusPoints(bonusPoints + flawValue);
+    //     } catch (error) {
+    //         console.error('Error adding flaw: ', error);
+    //     }
+    // };
+    // const handleAddMerit = async () => {
+    //     const meritValue = parseInt(newMerit.value, 10);
+    //     const meritData = { ...newMerit, gameCharId: id };
 
-        if (bonusPoints >= meritValue) {
-          try {
-            await axios.post(`http://localhost:8080/${id}/merits`, meritData);
-            setMerits([...merits, newMerit]);
-            setNewMerit({ name: '', value: 0 });
-            setBonusPoints(bonusPoints - meritValue);
-          } catch (error) {
-            console.log('Error adding merit: ', error);
-          }
-        }
-      };
+    //     if (bonusPoints >= meritValue) {
+    //         try {
+    //             await axios.post(`http://localhost:8080/${id}/merits`, meritData);
+    //             setMerits([...merits, newMerit]);
+    //             setNewMerit({ name: '', value: 0 });
+    //             setBonusPoints(bonusPoints - meritValue);
+    //         } catch (error) {
+    //             console.log('Error adding merit: ', error);
+    //         }
+    //     }
+    // };
 
-    const calculateTotalAttrNovaValue = () => {
-        return attributes.reduce((sum, attr) => sum + attr.novaValue, 0);
-    };
-    const calculateTotalAbilNovaValue = () => {
-        return abilities.reduce((sum, attr) => sum + attr.novaValue, 0);
-    };
-    const calculateTotalBkgrNovaValue = () => {
-        return backgrounds.reduce((sum, attr) => sum + attr.novaValue, 0);
-    };
+    // const calculateTotalAttrNovaValue = () => {
+    //     return attributes.reduce((sum, attr) => sum + attr.novaValue, 0);
+    // };
+    // const calculateTotalAbilNovaValue = () => {
+    //     return abilities.reduce((sum, attr) => sum + attr.novaValue, 0);
+    // };
+    // const calculateTotalBkgrNovaValue = () => {
+    //     return backgrounds.reduce((sum, attr) => sum + attr.novaValue, 0);
+    // };
 
-    const calculateFreeAttrIncreases = () => {
-        const totalNovaValue = calculateTotalAttrNovaValue();
-        return (3 - (totalNovaValue % 3)) % 3;
-    };
-    const calculateFreeAbilIncreases = () => {
-        const totalNovaValue = calculateTotalAbilNovaValue();
-        return (6 - (totalNovaValue % 6)) % 6;
-    };
-    const calculateFreeBkgrIncreases = () => {
-        const totalNovaValue = calculateTotalBkgrNovaValue();
-        return (5 - (totalNovaValue % 5)) % 5;
-    };
+    // const calculateFreeAttrIncreases = () => {
+    //     const totalNovaValue = calculateTotalAttrNovaValue();
+    //     return (3 - (totalNovaValue % 3)) % 3;
+    // };
+    // const calculateFreeAbilIncreases = () => {
+    //     const totalNovaValue = calculateTotalAbilNovaValue();
+    //     return (6 - (totalNovaValue % 6)) % 6;
+    // };
+    // const calculateFreeBkgrIncreases = () => {
+    //     const totalNovaValue = calculateTotalBkgrNovaValue();
+    //     return (5 - (totalNovaValue % 5)) % 5;
+    // };
 
     const handleAttrIncrement = (index) => {
 
         const attribute = attributes[index];
-        const totalValue = attribute.value + attribute.bonusValue + attribute.novaValue;
+        const totalValue = attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue;
 
         if (totalValue < 5) {
-            const freeIncreases = calculateFreeAttrIncreases();
+            // const freeIncreases = calculateFreeAttrIncreases();
 
-            if (freeIncreases === 0 && novaPoints < 1) {
-                alert('Not enough nova points');
+            // if (freeIncreases === 0 && novaPoints < 1) {
+            //     alert('Not enough nova points');
+            //     return;
+            // }
+            if (expPoints < (totalValue * 4)) {
+                alert('Not enough experience');
                 return;
             }
             const newAttributes = [...attributes];
-            newAttributes[index].novaValue += 1;
+            newAttributes[index].expValue += 1;
             setAttributes(newAttributes);
-            if (freeIncreases === 0) {
-                setNovaPoints(novaPoints - 1);
-            }
+            setExpPoints(expPoints - (totalValue * 4));
         }
     };
 
     const handleAbilIncrement = (attrIndex, abilIndex) => {
         const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
         const ability = attrAbilities[abilIndex];
+        const totalValue = ability.value + ability.bonusValue + ability.novaValue + ability.expValue;
 
-        if (ability.value + ability.bonusValue + ability.novaValue < 5) {
-            const freeIncreases = calculateFreeAbilIncreases();
+        if (totalValue < 5) {
+            // const freeIncreases = calculateFreeAbilIncreases();
 
-            if (freeIncreases === 0 && novaPoints < 1) {
-                alert('Not enough nova points');
+            // if (freeIncreases === 0 && novaPoints < 1) {
+            //     alert('Not enough nova points');
+            //     return;
+            // }
+            if (expPoints < (totalValue * 2)) {
+                alert('Not enough experience');
                 return;
             }
             const newAbilities = [...abilities];
             const index = abilities.indexOf(ability);
-            newAbilities[index].novaValue += 1;
+            newAbilities[index].expValue += 1;
             setAbilities(newAbilities);
-            if (freeIncreases === 0) {
-                setNovaPoints(novaPoints - 1);
-            }
+            setExpPoints(expPoints - (totalValue * 2));
         }
     };
 
     const handleBkgrIncrement = (index) => {
 
         const background = backgrounds[index];
-        const totalValue = background.value + background.bonusValue + background.novaValue;
+        const totalValue = background.value + background.bonusValue + background.novaValue + background.expValue;
 
         if (totalValue < 5) {
-            const freeIncreases = calculateFreeBkgrIncreases();
+            // const freeIncreases = calculateFreeBkgrIncreases();
 
-            if (freeIncreases === 0 && novaPoints < 1) {
-                alert('Not enough nova points');
+            // if (freeIncreases === 0 && novaPoints < 1) {
+            //     alert('Not enough nova points');
+            //     return;
+            // }
+            if (expPoints < (totalValue * 2)) {
+                alert('Not enough experience');
                 return;
             }
             const newBackgrounds = [...backgrounds];
-            newBackgrounds[index].novaValue += 1;
+            newBackgrounds[index].expValue += 1;
             setBackgrounds(newBackgrounds);
-            if (freeIncreases === 0) {
-                setNovaPoints(novaPoints - 1);
-            }
+            setExpPoints(expPoints - (totalValue * 2));
 
-            if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
+            if (background.name === 'Node' && totalValue > 2) {
                 setTaint(taint + 1);
             }
         }
     };
 
     const handleWillIncrement = () => {
-        const totalValue = gameChar.willpowerNova + 3;
-        if (totalValue < 10 && novaPoints >= 1) {
+        const totalValue = gameChar.willpowerBonus + gameChar.willpowerNova + gameChar.willpowerExp + 3;
+        if (totalValue < 10 && expPoints >= totalValue) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                willpowerNova: prevChar.willpowerNova + 1
+                willpowerExp: prevChar.willpowerExp + 1
             }));
-            setNovaPoints(novaPoints - 1);
+            setExpPoints(expPoints - totalValue);
         }
     };
 
@@ -285,7 +293,7 @@ const ExperiencePoints = () => {
             const newPowers = [...powers];
             if (power.level + power.hasExtra === 1 && tainted) {
                 newPowers[index].value += 2;
-            }   else {
+            } else {
                 newPowers[index].value += 1;
             }
             setPowers(newPowers);
@@ -293,15 +301,15 @@ const ExperiencePoints = () => {
         }
     };
 
-      const handleInitIncrement = () => {
+    const handleInitIncrement = () => {
         if (bonusPoints >= 1) {
-          setGameChar(prevChar => ({
-            ...prevChar,
-            initiativeBonus: prevChar.initiativeBonus + 1
-          }));
-          setBonusPoints(bonusPoints - 1);
+            setGameChar(prevChar => ({
+                ...prevChar,
+                initiativeBonus: prevChar.initiativeBonus + 1
+            }));
+            setBonusPoints(bonusPoints - 1);
         }
-      };
+    };
 
     const handleAttrDecrement = (index) => {
         const attribute = attributes[index];
@@ -400,7 +408,7 @@ const ExperiencePoints = () => {
             const newPowers = [...powers];
             if (power.level + power.hasExtra === 1 && tainted) {
                 newPowers[index].value -= 2;
-            }   else {
+            } else {
                 newPowers[index].value -= 1;
             }
             setPowers(newPowers);
@@ -408,32 +416,32 @@ const ExperiencePoints = () => {
         }
     };
 
-      const handleInitDecrement = () => {
+    const handleInitDecrement = () => {
         if (gameChar.initiativeBonus > 0) {
-          setGameChar(prevChar => ({
-            ...prevChar,
-            initiativeBonus: prevChar.initiativeBonus - 1
-          }));
-          setBonusPoints(bonusPoints + 1);
+            setGameChar(prevChar => ({
+                ...prevChar,
+                initiativeBonus: prevChar.initiativeBonus - 1
+            }));
+            setBonusPoints(bonusPoints + 1);
         }
-      };
+    };
 
-      const handleSpecialtySubmit = async () => {
+    const handleSpecialtySubmit = async () => {
         if (selectedAbilityId) {
-          try {
-            const response = await axios.post(`http://localhost:8080/api/specialties/ability/${selectedAbilityId}`, newSpecialty);
-            setAbilities((prevAbilities) =>
-              prevAbilities.map((ability) =>
-                ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
-              )
-            );
-            setBonusPoints(bonusPoints - 1);
-            handleSpecialtyModalClose();
-          } catch (error) {
-            console.error('Error adding specialty:', error);
-          }
+            try {
+                const response = await axios.post(`http://localhost:8080/api/specialties/ability/${selectedAbilityId}`, newSpecialty);
+                setAbilities((prevAbilities) =>
+                    prevAbilities.map((ability) =>
+                        ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
+                    )
+                );
+                setBonusPoints(bonusPoints - 1);
+                handleSpecialtyModalClose();
+            } catch (error) {
+                console.error('Error adding specialty:', error);
+            }
         }
-      };
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -514,43 +522,43 @@ const ExperiencePoints = () => {
         }
     };
 
-      const handleSpecialtyDelete = async (specialtyId, abilityId) => {
+    const handleSpecialtyDelete = async (specialtyId, abilityId) => {
         try {
-          await axios.delete(`http://localhost:8080/api/specialties/${specialtyId}`);
-          setAbilities((prevAbilities) =>
-            prevAbilities.map((ability) =>
-              ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
-            )
-          );
-          setBonusPoints(bonusPoints + 1);
+            await axios.delete(`http://localhost:8080/api/specialties/${specialtyId}`);
+            setAbilities((prevAbilities) =>
+                prevAbilities.map((ability) =>
+                    ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
+                )
+            );
+            setBonusPoints(bonusPoints + 1);
         } catch (error) {
-          console.error('Error deleting specialty:', error);
+            console.error('Error deleting specialty:', error);
         }
-      };
+    };
 
-      const handleFlawDelete = async (flawId, flawValue) => {
+    const handleFlawDelete = async (flawId, flawValue) => {
         try {
-          await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
-          setFlaws((prevFlaws) =>
-            prevFlaws.filter((flaw) => flaw.id !== flawId)
-          );
-          setBonusPoints(bonusPoints - parseInt(flawValue, 10));
+            await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
+            setFlaws((prevFlaws) =>
+                prevFlaws.filter((flaw) => flaw.id !== flawId)
+            );
+            setBonusPoints(bonusPoints - parseInt(flawValue, 10));
         } catch (error) {
-          console.error('Error deleting flaw:', error);
+            console.error('Error deleting flaw:', error);
         }
-      };
+    };
 
-      const handleMeritDelete = async (meritId, meritValue) => {
+    const handleMeritDelete = async (meritId, meritValue) => {
         try {
-          await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
-          setMerits((prevMerits) =>
-            prevMerits.filter((merit) => merit.id !== meritId)
-          );
-          setBonusPoints(bonusPoints + parseInt(meritValue, 10));
+            await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
+            setMerits((prevMerits) =>
+                prevMerits.filter((merit) => merit.id !== meritId)
+            );
+            setBonusPoints(bonusPoints + parseInt(meritValue, 10));
         } catch (error) {
-          console.error('Error deleting merit:', error);
+            console.error('Error deleting merit:', error);
         }
-      };
+    };
 
     return (
         <Container fluid>
@@ -639,19 +647,19 @@ const ExperiencePoints = () => {
                                                                         <div>
                                                                             <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + 1} max={6} /></span>
                                                                             <Button
-                                                                            className='ms-2'
-                                                                            variant="danger"
-                                                                            size="sm"
-                                                                            onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
-                                                                        >
-                                                                            x
-                                                                        </Button>
+                                                                                className='ms-2'
+                                                                                variant="danger"
+                                                                                size="sm"
+                                                                                onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
+                                                                            >
+                                                                                x
+                                                                            </Button>
                                                                         </div>
                                                                     </li>
                                                                 ))}
                                                             </ul>
                                                             {ability.specialties.length < 3 && (
-                                                            <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
+                                                                <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
                                                             )}
                                                         </div>
                                                     </li>
@@ -958,31 +966,31 @@ const ExperiencePoints = () => {
             </main>
             {/* Specialty Modal */}
             <Modal show={showSpecialtyModal} onHide={handleSpecialtyModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Specialty</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group>
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type='text'
-                name='name'
-                value={newSpecialty.name}
-                onChange={handleSpecialtyInputChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant='secondary' onClick={handleSpecialtyModalClose}>
-            Close
-          </Button>
-          <Button variant='primary' onClick={handleSpecialtySubmit}>
-            Add Specialty
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add New Specialty</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group>
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control
+                                type='text'
+                                name='name'
+                                value={newSpecialty.name}
+                                onChange={handleSpecialtyInputChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='secondary' onClick={handleSpecialtyModalClose}>
+                        Close
+                    </Button>
+                    <Button variant='primary' onClick={handleSpecialtySubmit}>
+                        Add Specialty
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };
@@ -1082,7 +1090,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
     const novaCost = (value) => {
         if (!tainted) {
             return value;
-        }   else {
+        } else {
             return Math.ceil(value / 2);
         }
     };
@@ -1178,7 +1186,7 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
     const novaCost = (value) => {
         if (!tainted) {
             return value;
-        }   else {
+        } else {
             return Math.ceil(value / 2);
         }
     };
@@ -1359,16 +1367,16 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
 const TaintedButton = ({ tainted, setTainted }) => {
 
     return (
-        <div style={{position:"relative"}}>
-            <div style={{position:"absolute", float:"right", bottom:-50, right:150}}>
-                <input 
-                type="checkbox" 
-                class="btn-check" 
-                id="btn-check-outlined"
-                onChange={() => {
-                    setTainted(!tainted);
-                }}
-                autocomplete="off" />
+        <div style={{ position: "relative" }}>
+            <div style={{ position: "absolute", float: "right", bottom: -50, right: 150 }}>
+                <input
+                    type="checkbox"
+                    class="btn-check"
+                    id="btn-check-outlined"
+                    onChange={() => {
+                        setTainted(!tainted);
+                    }}
+                    autocomplete="off" />
                 <label class="btn btn-outline-primary" for="btn-check-outlined">Buy Tainted</label>
             </div>
         </div>
