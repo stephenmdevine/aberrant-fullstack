@@ -259,14 +259,14 @@ const ExperiencePoints = () => {
     };
 
     const handleQuantIncrement = () => {
-        const totalValue = gameChar.quantumNova + 1;
-        const cost = novaCost(5);
-        if (totalValue < 10 && novaPoints >= cost) {
+        const totalValue = gameChar.quantumBonus + gameChar.quantumNova + gameChar.quantumExp + 1;
+        const cost = expCost(totalValue * 8);
+        if (totalValue < 10 && expPoints >= cost) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                quantumNova: prevChar.quantumNova + 1
+                quantumExp: prevChar.quantumExp + 1
             }));
-            setNovaPoints(novaPoints - cost);
+            setExpPoints(expPoints - cost);
         }
     };
 
