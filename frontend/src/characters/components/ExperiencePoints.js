@@ -201,6 +201,8 @@ const ExperiencePoints = () => {
         const ability = attrAbilities[abilIndex];
         const totalValue = ability.value + ability.bonusValue + ability.novaValue + ability.expValue;
 
+        const cost = totalValue === 0 ? 3 : (totalValue * 2);
+
         if (totalValue < 5) {
             // const freeIncreases = calculateFreeAbilIncreases();
 
@@ -208,7 +210,7 @@ const ExperiencePoints = () => {
             //     alert('Not enough nova points');
             //     return;
             // }
-            if (expPoints < (totalValue * 2)) {
+            if (expPoints < cost) {
                 alert('Not enough experience');
                 return;
             }
@@ -216,7 +218,7 @@ const ExperiencePoints = () => {
             const index = abilities.indexOf(ability);
             newAbilities[index].expValue += 1;
             setAbilities(newAbilities);
-            setExpPoints(expPoints - (totalValue * 2));
+            setExpPoints(expPoints - cost);
         }
     };
 
@@ -225,6 +227,8 @@ const ExperiencePoints = () => {
         const background = backgrounds[index];
         const totalValue = background.value + background.bonusValue + background.novaValue + background.expValue;
 
+        const cost = totalValue === 0 ? 2 : (totalValue * 2);
+
         if (totalValue < 5) {
             // const freeIncreases = calculateFreeBkgrIncreases();
 
@@ -232,14 +236,14 @@ const ExperiencePoints = () => {
             //     alert('Not enough nova points');
             //     return;
             // }
-            if (expPoints < (totalValue * 2)) {
+            if (expPoints < cost) {
                 alert('Not enough experience');
                 return;
             }
             const newBackgrounds = [...backgrounds];
             newBackgrounds[index].expValue += 1;
             setBackgrounds(newBackgrounds);
-            setExpPoints(expPoints - (totalValue * 2));
+            setExpPoints(expPoints - cost);
 
             if (background.name === 'Node' && totalValue > 2) {
                 setTaint(taint + 1);
@@ -274,13 +278,15 @@ const ExperiencePoints = () => {
 
         const megaAttribute = megaAttributes[index];
         const maxValue = getAttributeValue(megaAttribute.name.slice(5));
-        const cost = novaCost(3);
 
-        if (megaAttribute.value < maxValue && novaPoints >= cost) {
+        const totalValue = megaAttribute.value + megaAttribute.expValue;
+        const cost = totalValue === 0 ? expCost(6) : expCost(totalValue * 5);
+
+        if (totalValue < maxValue && expPoints >= cost) {
             const newMegaAttributes = [...megaAttributes];
-            newMegaAttributes[index].value += 1;
+            newMegaAttributes[index].expValue += 1;
             setMegaAttributes(newMegaAttributes);
-            setNovaPoints(novaPoints - cost);
+            setExpPoints(expPoints - cost);
         }
     };
 
