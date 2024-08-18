@@ -424,7 +424,7 @@ const BonusPoints = () => {
         <form onSubmit={handleSubmit}>
           {/* Attributes and Abilities Section */}
           <section className="attribute-section mb-5">
-            {attributes.map((attribute, attrIndex) => {
+            {attributes.slice(0, 9).map((attribute, attrIndex) => {
               const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attribute.name);
               return (
                 <Container key={attribute.name} className="my-4">

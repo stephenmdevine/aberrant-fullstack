@@ -77,7 +77,7 @@ const NovaPoints = () => {
     const novaCost = (value) => {
         if (!tainted) {
             return value;
-        }   else {
+        } else {
             return Math.ceil(value / 2);
         }
     };
@@ -218,7 +218,7 @@ const NovaPoints = () => {
             const newPowers = [...powers];
             if (power.level + power.hasExtra === 1 && tainted) {
                 newPowers[index].value += 2;
-            }   else {
+            } else {
                 newPowers[index].value += 1;
             }
             setPowers(newPowers);
@@ -323,7 +323,7 @@ const NovaPoints = () => {
             const newPowers = [...powers];
             if (power.level + power.hasExtra === 1 && tainted) {
                 newPowers[index].value -= 2;
-            }   else {
+            } else {
                 newPowers[index].value -= 1;
             }
             setPowers(newPowers);
@@ -797,7 +797,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
     const novaCost = (value) => {
         if (!tainted) {
             return value;
-        }   else {
+        } else {
             return Math.ceil(value / 2);
         }
     };
@@ -892,25 +892,26 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
 
     const novaCost = (value) => {
         if (!tainted) {
-            return value;
-        }   else {
+            return Number(value);
+        } else {
             return Math.ceil(value / 2);
         }
     };
 
     const handlePowerInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        const parsedValue = type === 'checkbox' ? checked : (name === 'level' || name === 'quantumMinimum') ? Number(value) : value;
 
-        if (name === 'level' && value === '3') {
+        if (name === 'level' && parsedValue === 3) {
             setNewPower({
                 ...newPower,
-                level: value,
+                level: parsedValue,
                 hasExtra: false
             });
         } else {
             setNewPower({
                 ...newPower,
-                [name]: type === 'checkbox' ? checked : value
+                [name]: type === 'checkbox' ? checked : parsedValue
             });
         }
     };
@@ -920,8 +921,13 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
         console.log("Power save initiated...");
         console.log(newPower.attributeId);
 
-        const powerCost = (2 * (newPower.level + newPower.hasExtra - 1)) + 1;
+        const powerCost = (2 * (Number(newPower.level) + Number(newPower.hasExtra) - 1)) + 1;
         const cost = novaCost(powerCost);
+
+        if (isNaN(novaPoints)) {
+            console.error('Invalid novaPoints value:', novaPoints);
+            return;
+        }
 
         if (newPower.level + newPower.hasExtra === 1 && tainted) {
             newPower.value = 2;
@@ -932,12 +938,16 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
             return;
         }
 
+        setNovaPoints(prev => {
+            const newPoints = Number(prev) - Number(cost);
+            return newPoints >= 0 ? newPoints : 0;  // Ensure it doesn't go below zero
+        });
+
         try {
             const response = await axios.post(`http://localhost:8080/api/powers/${id}`, newPower);
             console.log(newPower.name + " saved.");
             const updatedPowers = [...powers, response.data];
             setPowers(updatedPowers);
-            setNovaPoints(novaPoints - cost);
         } catch (error) {
             console.error('Error saving power:', error);
         }
@@ -1074,16 +1084,16 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
 const TaintedButton = ({ tainted, setTainted }) => {
 
     return (
-        <div style={{position:"relative"}}>
-            <div style={{position:"absolute", float:"right", bottom:-50, right:150}}>
-                <input 
-                type="checkbox" 
-                class="btn-check" 
-                id="btn-check-outlined"
-                onChange={() => {
-                    setTainted(!tainted);
-                }}
-                autocomplete="off" />
+        <div style={{ position: "relative" }}>
+            <div style={{ position: "absolute", float: "right", bottom: -50, right: 150 }}>
+                <input
+                    type="checkbox"
+                    class="btn-check"
+                    id="btn-check-outlined"
+                    onChange={() => {
+                        setTainted(!tainted);
+                    }}
+                    autocomplete="off" />
                 <label class="btn btn-outline-primary" for="btn-check-outlined">Buy Tainted</label>
             </div>
         </div>

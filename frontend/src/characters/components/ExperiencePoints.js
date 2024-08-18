@@ -45,6 +45,7 @@ const ExperiencePoints = () => {
 
     useEffect(() => {
         loadGameChar();
+        setFreeExp(parseInt(expPoints - expSpent));
     }, []);
 
     // useEffect(() => {
@@ -77,7 +78,6 @@ const ExperiencePoints = () => {
             // setMerits(result.data.merits);
             setMegaAttributes(result.data.megaAttributes);
             setPowers(result.data.powers);
-            setFreeExp(parseInt(expPoints - expSpent));
         } catch (error) {
             console.error('Error loading character:', error);
         }
@@ -292,143 +292,132 @@ const ExperiencePoints = () => {
 
     const handlePowerIncrement = (index) => {
         const power = powers[index];
-        const powerCost = (2 * (power.level + power.hasExtra - 1)) + 1;
-        const cost = novaCost(powerCost);
+        const totalValue = power.value + power.expValue;
+        const powerCost = PowerCost(totalValue, power.level);
+        const cost = expCost(powerCost);
 
-        if (power.value < 5 && novaPoints >= cost) {
+        if (totalValue < 5 && expPoints >= cost) {
             const newPowers = [...powers];
-            if (power.level + power.hasExtra === 1 && tainted) {
-                newPowers[index].value += 2;
-            } else {
-                newPowers[index].value += 1;
-            }
             setPowers(newPowers);
-            setNovaPoints(novaPoints - cost);
+            setExpPoints(expPoints - cost);
         }
     };
 
     const handleInitIncrement = () => {
-        if (bonusPoints >= 1) {
+        const cost = initiative;
+        if (expPoints >= cost) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                initiativeBonus: prevChar.initiativeBonus + 1
+                initiativeExp: prevChar.initiativeExp + 1
             }));
-            setBonusPoints(bonusPoints - 1);
+            setExpPoints(expPoints - cost);
         }
     };
 
     const handleAttrDecrement = (index) => {
         const attribute = attributes[index];
+        const totalValue = attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue - 1;
 
-        if (attribute.novaValue > 0) {
+        if (attribute.expValue > 0) {
             const newAttributes = [...attributes];
-            newAttributes[index].novaValue -= 1;
+            newAttributes[index].expValue -= 1;
             setAttributes(newAttributes);
-
-            const totalNovaValue = calculateTotalAttrNovaValue() - 1;
-
-            if ((totalNovaValue + 1) % 3 === 0) {
-                setNovaPoints(novaPoints + 1);
-            }
+            setExpPoints(expPoints + totalValue * 4);
         }
     };
 
     const handleAbilDecrement = (attrIndex, abilIndex) => {
         const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
         const ability = attrAbilities[abilIndex];
+        const totalValue = ability.value + ability.bonusValue + ability.novaValue + ability.expValue - 1;
 
-        if (ability.novaValue > 0) {
+        if (ability.expValue > 0) {
             const newAbilities = [...abilities];
             const index = abilities.indexOf(ability);
-            newAbilities[index].novaValue -= 1;
+            newAbilities[index].expValue -= 1;
             setAbilities(newAbilities);
-
-            const totalNovaValue = calculateTotalAbilNovaValue() - 1;
-
-            if ((totalNovaValue + 1) % 6 === 0) {
-                setNovaPoints(novaPoints + 1);
-            }
+            setExpPoints(expPoints + totalValue * 2);
         }
     };
 
     const handleBkgrDecrement = (index) => {
         const background = backgrounds[index];
+        const totalValue = background.value + background.bonusValue + background.novaValue + background.expValue - 1;
 
-        if (background.novaValue > 0) {
+        if (background.expValue > 0) {
             const newBackgrounds = [...backgrounds];
-            newBackgrounds[index].novaValue -= 1;
+            newBackgrounds[index].expValue -= 1;
             setBackgrounds(newBackgrounds);
+            setExpPoints(expPoints + totalValue * 2);
 
-            const totalNovaValue = calculateTotalBkgrNovaValue() - 1;
-
-            if ((totalNovaValue + 1) % 5 === 0) {
-                setNovaPoints(novaPoints + 1);
-            }
-
-            if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue > 2) {
+            if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue + background.expValue > 2) {
                 setTaint(taint - 1);
             }
         }
     };
 
     const handleWillDecrement = () => {
-        if (gameChar.willpowerNova > 0) {
+        const totalValue = gameChar.willpowerBonus + gameChar.willpowerNova + gameChar.willpowerExp + 3 - 1;
+
+        if (gameChar.willpowerExp > 0) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                willpowerNova: prevChar.willpowerNova - 1
+                willpowerExp: prevChar.willpowerExp - 1
             }));
-            setNovaPoints(novaPoints + 1);
+            setExpPoints(expPoints + totalValue);
         }
     };
 
     const handleQuantDecrement = () => {
-        const cost = novaCost(5);
+        const totalValue = gameChar.quantumBonus + gameChar.quantumNova + gameChar.quantumExp + 0;
+        const cost = expCost(totalValue * 8);
 
-        if (gameChar.quantumNova > 0) {
+        if (gameChar.quantumExp > 0) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                quantumNova: prevChar.quantumNova - 1
+                quantumExp: prevChar.quantumExp - 1
             }));
-            setNovaPoints(novaPoints + cost);
+            setExpPoints(expPoints + cost);
         }
     };
 
     const handleMegaAttrDecrement = (index) => {
         const megaAttribute = megaAttributes[index];
-        const cost = novaCost(3);
 
-        if (megaAttribute.value > 0) {
+        const totalValue = megaAttribute.value + megaAttribute.expValue - 1;
+        const cost = expCost(totalValue * 5);
+
+        if (megaAttribute.expValue > 0) {
             const newMegaAttributes = [...megaAttributes];
-            newMegaAttributes[index].value -= 1;
+            newMegaAttributes[index].expValue -= 1;
             setMegaAttributes(newMegaAttributes);
-            setNovaPoints(novaPoints + cost);
+            setExpPoints(expPoints + cost);
         }
     };
 
     const handlePowerDecrement = (index) => {
         const power = powers[index];
-        const powerCost = (2 * (power.level + power.hasExtra - 1)) + 1;
-        const cost = novaCost(powerCost);
+        const totalValue = power.value + power.expValue - 1;
+        const powerCost = PowerCost(totalValue, power.level);
+        const cost = expCost(powerCost);
 
-        if (power.value > 0) {
+        if (power.expValue > 0) {
             const newPowers = [...powers];
-            if (power.level + power.hasExtra === 1 && tainted) {
-                newPowers[index].value -= 2;
-            } else {
-                newPowers[index].value -= 1;
-            }
+            newPowers[index].expValue -= 1;
             setPowers(newPowers);
-            setNovaPoints(novaPoints + cost);
+            setExpPoints(expPoints + cost);
         }
     };
 
     const handleInitDecrement = () => {
-        if (gameChar.initiativeBonus > 0) {
+        const cost = initiative - 1
+            ;
+        if (gameChar.initiativeExp > 0) {
             setGameChar(prevChar => ({
                 ...prevChar,
-                initiativeBonus: prevChar.initiativeBonus - 1
+                initiativeExp: prevChar.initiativeExp - 1
             }));
-            setBonusPoints(bonusPoints + 1);
+            setExpPoints(expPoints + cost);
         }
     };
 
@@ -441,7 +430,7 @@ const ExperiencePoints = () => {
                         ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
                     )
                 );
-                setBonusPoints(bonusPoints - 1);
+                setExpPoints(expPoints - 1);
                 handleSpecialtyModalClose();
             } catch (error) {
                 console.error('Error adding specialty:', error);
@@ -482,16 +471,6 @@ const ExperiencePoints = () => {
             expValue: megaAttribute.expValue,
         }));
 
-        const PowerDTOs = powers.map(power => ({
-            name: power.name,
-            value: power.value,
-            expValue: power.expValue,
-            level: power.level,
-            quantumMinimum: power.quantumMinimum,
-            hasExtra: power.hasExtra,
-            extraName: power.extraName,
-        }));
-
         try {
             await Promise.all([
                 axios.put(`http://localhost:8080/allocateAttributePoints/${id}`, {
@@ -514,10 +493,15 @@ const ExperiencePoints = () => {
                     baseTaint: gameChar.baseTaint,
                     taint: gameChar.taint,
                     willpowerBonus: gameChar.willpowerBonus,
-                    quantumBonus: gameChar.quantumBonus,
                     willpowerNova: gameChar.willpowerNova,
+                    willpowerExp: gameChar.willpowerExp,
+                    quantumBonus: gameChar.quantumBonus,
                     quantumNova: gameChar.quantumNova,
+                    quantumExp: gameChar.quantumExp,
+                    quantumPoolBonus: gameChar.quantumPoolBonus,
+                    quantumPoolExp: gameChar.quantumPoolExp,
                     initiativeBonus: gameChar.initiativeBonus,
+                    initiativeExp: gameChar.initiativeExp,
                 })
             ]);
 
@@ -536,35 +520,35 @@ const ExperiencePoints = () => {
                     ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
                 )
             );
-            setBonusPoints(bonusPoints + 1);
+            setExpPoints(expPoints + 1);
         } catch (error) {
             console.error('Error deleting specialty:', error);
         }
     };
 
-    const handleFlawDelete = async (flawId, flawValue) => {
-        try {
-            await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
-            setFlaws((prevFlaws) =>
-                prevFlaws.filter((flaw) => flaw.id !== flawId)
-            );
-            setBonusPoints(bonusPoints - parseInt(flawValue, 10));
-        } catch (error) {
-            console.error('Error deleting flaw:', error);
-        }
-    };
+    // const handleFlawDelete = async (flawId, flawValue) => {
+    //     try {
+    //         await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
+    //         setFlaws((prevFlaws) =>
+    //             prevFlaws.filter((flaw) => flaw.id !== flawId)
+    //         );
+    //         setBonusPoints(bonusPoints - parseInt(flawValue, 10));
+    //     } catch (error) {
+    //         console.error('Error deleting flaw:', error);
+    //     }
+    // };
 
-    const handleMeritDelete = async (meritId, meritValue) => {
-        try {
-            await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
-            setMerits((prevMerits) =>
-                prevMerits.filter((merit) => merit.id !== meritId)
-            );
-            setBonusPoints(bonusPoints + parseInt(meritValue, 10));
-        } catch (error) {
-            console.error('Error deleting merit:', error);
-        }
-    };
+    // const handleMeritDelete = async (meritId, meritValue) => {
+    //     try {
+    //         await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
+    //         setMerits((prevMerits) =>
+    //             prevMerits.filter((merit) => merit.id !== meritId)
+    //         );
+    //         setBonusPoints(bonusPoints + parseInt(meritValue, 10));
+    //     } catch (error) {
+    //         console.error('Error deleting merit:', error);
+    //     }
+    // };
 
     return (
         <Container fluid>
@@ -604,21 +588,26 @@ const ExperiencePoints = () => {
                                     <Row>
                                         <Col className="text-center">
                                             <div className="btn-toolbar justify-content-center" role="toolbar">
-                                                <h4 className='me-2'><SymbolDisplay value={attribute.value + attribute.bonusValue + attribute.novaValue} /></h4>
+                                                <h4 className='me-2 pt-1'><SymbolDisplay value={attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue} /></h4>
                                                 <ButtonGroup className='border rounded shadow'>
                                                     <Button variant="light" onClick={() => handleAttrDecrement(attrIndex)}>
                                                         <i className="bi bi-dash-square"></i>
                                                     </Button>
-                                                    <Button variant="primary" onClick={() => handleAttrIncrement(attrIndex)}>
+                                                    <Button variant="primary" onClick={() => handleAttrIncrement(attrIndex)}
+                                                        disabled={attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue === 5}>
                                                         <i className="bi bi-plus-square"></i>
                                                     </Button>
                                                 </ButtonGroup>
+                                                <h4 className='ps-2 pt-1'>{
+                                                    (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) < 5 ?
+                                                (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) * 4 : ""
+                                                }</h4>
                                             </div>
                                         </Col>
                                     </Row>
                                     <Row>
                                         <Col>
-                                            {attribute.value + attribute.bonusValue + attribute.novaValue >= 4 && (
+                                            {attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue >= 4 && (
                                                 <QualityManager attributeId={attribute.id} />
                                             )}
                                         </Col>
@@ -803,8 +792,8 @@ const ExperiencePoints = () => {
                                             {megaAttribute.value > 0 && (
                                                 <EnhancementManager
                                                     megaAttributeId={megaAttribute.id}
-                                                    novaPoints={novaPoints}
-                                                    setNovaPoints={setNovaPoints}
+                                                    expPoints={expPoints}
+                                                    setExpPoints={setExpPoints}
                                                     tainted={tainted}
                                                 />
 
@@ -862,15 +851,15 @@ const ExperiencePoints = () => {
                             attributes={attributes}
                             powers={powers}
                             setPowers={setPowers}
-                            novaPoints={novaPoints}
-                            setNovaPoints={setNovaPoints}
+                            expPoints={expPoints}
+                            setExpPoints={setExpPoints}
                             id={id}
                             tainted={tainted}
                         />
                     </section>
 
                     {/* Flaws Section */}
-                    <section className='flaws-section my-4'>
+                    {/* <section className='flaws-section my-4'>
                         <h3>Flaws</h3>
                         <ListGroup className='mb-3'>
                             {flaws.map((flaw, index) => (
@@ -914,10 +903,10 @@ const ExperiencePoints = () => {
                                 </Col>
                             </Row>
                         </Form>
-                    </section>
+                    </section> */}
 
                     {/* Merits Section */}
-                    <section className='merits-section my-4'>
+                    {/* <section className='merits-section my-4'>
                         <h3>Merits</h3>
                         <ListGroup className='mb-3'>
                             {merits.map((merit, index) => (
@@ -961,7 +950,7 @@ const ExperiencePoints = () => {
                                 </Col>
                             </Row>
                         </Form>
-                    </section>
+                    </section> */}
 
                     {/* Submit and Cancel Buttons */}
                     <div className="d-flex justify-content-center my-4">
@@ -1073,7 +1062,7 @@ const QualityManager = ({ attributeId }) => {
 
 
 
-const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainted }) => {
+const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted }) => {
     // State to hold the quality name entered by the user
     const [enhancementName, setEnhancementName] = useState('');
     // State to hold the existing quality name (if any) for placeholder
@@ -1093,7 +1082,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
         fetchEnhancements();
     }, [megaAttributeId]);
 
-    const novaCost = (value) => {
+    const expCost = (value) => {
         if (!tainted) {
             return value;
         } else {
@@ -1108,10 +1097,10 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
 
     // Save or update the quality
     const saveEnhancement = async () => {
-        const enhancementCost = existingEnhancements.length > 0 ? novaCost(3) : 0;
+        const enhancementCost = existingEnhancements.length > 0 ? expCost(5) : 0;
 
-        if (novaPoints < enhancementCost) {
-            alert('Not enough nova points');
+        if (expPoints < enhancementCost) {
+            alert('Not enough experience points');
             return;
         }
 
@@ -1120,7 +1109,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
             setExistingEnhancements([...existingEnhancements, { name: enhancementName }]);
             setEnhancementName(''); // Clear the input field
             if (enhancementCost > 0) {
-                setNovaPoints(novaPoints - enhancementCost);
+                setExpPoints(expPoints - enhancementCost);
             }
         } catch (error) {
             console.error('Error saving enhancement:', error);
@@ -1128,12 +1117,12 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
     };
 
     const handleDeleteEnhancement = async (megaAttributeId, enhancementId) => {
-        const enhancementCostReturn = existingEnhancements.length > 1 ? novaCost(3) : 0;
+        const enhancementCostReturn = existingEnhancements.length > 1 ? expCost(5) : 0;
 
         try {
             const response = await axios.delete(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements/${enhancementId}`);
             if (enhancementCostReturn > 0) {
-                setNovaPoints(novaPoints + enhancementCostReturn);
+                setExpPoints(expPoints + enhancementCostReturn);
             }
             fetchEnhancements();
         } catch (error) {
@@ -1176,7 +1165,7 @@ const EnhancementManager = ({ megaAttributeId, novaPoints, setNovaPoints, tainte
 
 
 
-const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoints, id, tainted }) => {
+const NewPowerManager = ({ attributes, powers, setPowers, expPoints, setExpPoints, id, tainted }) => {
 
     const [newPower, setNewPower] = useState({
         name: "",
@@ -1189,9 +1178,9 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
         attributeId: 0
     });
 
-    const novaCost = (value) => {
+    const expCost = (value) => {
         if (!tainted) {
-            return value;
+            return Number(value);
         } else {
             return Math.ceil(value / 2);
         }
@@ -1199,17 +1188,18 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
 
     const handlePowerInputChange = (e) => {
         const { name, value, type, checked } = e.target;
+        const parsedValue = type === 'checkbox' ? checked : (name === 'level' || name === 'quantumMinimum') ? Number(value) : value;    
 
-        if (name === 'level' && value === '3') {
+        if (name === 'level' && parsedValue === 6) {
             setNewPower({
                 ...newPower,
-                level: value,
+                level: parsedValue,
                 hasExtra: false
             });
         } else {
             setNewPower({
                 ...newPower,
-                [name]: type === 'checkbox' ? checked : value
+                [name]: type === 'checkbox' ? checked : parsedValue
             });
         }
     };
@@ -1219,24 +1209,29 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
         console.log("Power save initiated...");
         console.log(newPower.attributeId);
 
-        const powerCost = (2 * (newPower.level + newPower.hasExtra - 1)) + 1;
-        const cost = novaCost(powerCost);
+        const powerCost = Number(PowerCost(0, Number(newPower.level) + Number(newPower.hasExtra)));
+        const cost = expCost(powerCost);
 
-        if (newPower.level + newPower.hasExtra === 1 && tainted) {
-            newPower.value = 2;
-        }
-
-        if (novaPoints < cost) {
-            alert('Not enough nova points');
+        if (isNaN(expPoints)) {
+            console.error('Invalid expPoints value:', expPoints);
             return;
         }
+
+        if (expPoints < cost) {
+            alert('Not enough experience points');
+            return;
+        }
+
+        setExpPoints(prev => {
+            const newPoints = Number(prev) - Number(cost);
+            return newPoints >= 0 ? newPoints : 0;  // Ensure it doesn't go below zero
+        });
 
         try {
             const response = await axios.post(`http://localhost:8080/api/powers/${id}`, newPower);
             console.log(newPower.name + " saved.");
             const updatedPowers = [...powers, response.data];
             setPowers(updatedPowers);
-            setNovaPoints(novaPoints - cost);
         } catch (error) {
             console.error('Error saving power:', error);
         }
@@ -1272,14 +1267,14 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
                 </div>
             </div>
             <div className='row'>
-                <div className='col-md-6 text-end'>
+                <div className='col-md-5 text-end'>
                     <label>Base Power Level (with no extras)</label>
                 </div>
-                <div className='col-md-3 text-start'>
+                <div className='col-md-6 text-start'>
                     <input
                         type="range"
                         min={1}
-                        max={3}
+                        max={6}
                         className="form-range"
                         name='level'
                         value={newPower.level}
@@ -1289,7 +1284,7 @@ const NewPowerManager = ({ attributes, powers, setPowers, novaPoints, setNovaPoi
                 <div className='col-md-1 text-start'>{newPower.level}</div>
             </div>
             <div className='row'>
-                <div className='col-md-6 text-end'>
+                <div className='col-md-5 text-end'>
                     <label>Minimum Quantum</label>
                 </div>
                 <div className='col-md-5 text-start'>
@@ -1388,4 +1383,28 @@ const TaintedButton = ({ tainted, setTainted }) => {
         </div>
 
     );
+};
+
+
+
+const PowerCost = ({ currentRating, powerLevel }) => {
+    if (currentRating === 0) {
+        return powerLevel * 3;
+    }
+    switch (powerLevel) {
+        case 1:
+            return currentRating * 3;
+        case 2:
+            return currentRating * 5;
+        case 3:
+            return currentRating * 7;
+        case 4:
+            return currentRating * 9;
+        case 5:
+            return currentRating * 12;
+        case 6:
+            return currentRating * 15;
+        default:
+            return 0;
+    }
 };
