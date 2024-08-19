@@ -17,14 +17,8 @@ const ExperiencePoints = () => {
     const [novaPoints, setNovaPoints] = useState(0);
     const [expPoints, setExpPoints] = useState(0);
     const [expSpent, setExpSpent] = useState(0);
-    const [freeExp, setFreeExp] = useState(0);
     const [taint, setTaint] = useState(0);
     const [tainted, setTainted] = useState(false);
-    // // State for flaws and merits
-    // const [flaws, setFlaws] = useState([]);
-    // const [merits, setMerits] = useState([]);
-    // const [newFlaw, setNewFlaw] = useState({ name: '', value: 0 });
-    // const [newMerit, setNewMerit] = useState({ name: '', value: 0 });
     // State for Nova characteristics
     const [megaAttributes, setMegaAttributes] = useState([]);
     const [powers, setPowers] = useState([]);
@@ -45,21 +39,7 @@ const ExperiencePoints = () => {
 
     useEffect(() => {
         loadGameChar();
-        setFreeExp(parseInt(expPoints - expSpent));
     }, []);
-
-    // useEffect(() => {
-    //     // Update the Nova Points spent and free increases on attribute changes
-    //     calculateFreeAttrIncreases();
-    // }, [attributes]);
-    // useEffect(() => {
-    //     // Update the Nova Points spent and free increases on ability changes
-    //     calculateFreeAbilIncreases();
-    // }, [abilities]);
-    // useEffect(() => {
-    //     // Update the Nova Points spent and free increases on ability changes
-    //     calculateFreeBkgrIncreases();
-    // }, [backgrounds]);
 
     // Load all game character details
     const loadGameChar = async () => {
@@ -74,8 +54,6 @@ const ExperiencePoints = () => {
             setExpPoints(result.data.experiencePoints);
             setExpSpent(result.data.expSpent);
             setTaint(result.data.taint);
-            // setFlaws(result.data.flaws);
-            // setMerits(result.data.merits);
             setMegaAttributes(result.data.megaAttributes);
             setPowers(result.data.powers);
         } catch (error) {
@@ -116,83 +94,20 @@ const ExperiencePoints = () => {
         setNewSpecialty({ ...newSpecialty, [name]: value });
     };
 
-    //   // Handle flaw/merit form changes
-    // const handleFlawChange = (e) => setNewFlaw({ ...newFlaw, [e.target.name]: e.target.value });
-    // const handleMeritChange = (e) => setNewMerit({ ...newMerit, [e.target.name]: e.target.value });
-
-    //   // Handle flaw/merit form submissions
-    // const handleAddFlaw = async () => {
-    //     const flawValue = parseInt(newFlaw.value, 10);
-    //     const flawData = { ...newFlaw, gameCharId: id };
-
-    //     try {
-    //         await axios.post(`http://localhost:8080/${id}/flaws`, flawData);
-    //         setFlaws([...flaws, flawData]);
-    //         setNewFlaw({ name: '', value: 0 });
-    //         setBonusPoints(bonusPoints + flawValue);
-    //     } catch (error) {
-    //         console.error('Error adding flaw: ', error);
-    //     }
-    // };
-    // const handleAddMerit = async () => {
-    //     const meritValue = parseInt(newMerit.value, 10);
-    //     const meritData = { ...newMerit, gameCharId: id };
-
-    //     if (bonusPoints >= meritValue) {
-    //         try {
-    //             await axios.post(`http://localhost:8080/${id}/merits`, meritData);
-    //             setMerits([...merits, newMerit]);
-    //             setNewMerit({ name: '', value: 0 });
-    //             setBonusPoints(bonusPoints - meritValue);
-    //         } catch (error) {
-    //             console.log('Error adding merit: ', error);
-    //         }
-    //     }
-    // };
-
-    // const calculateTotalAttrNovaValue = () => {
-    //     return attributes.reduce((sum, attr) => sum + attr.novaValue, 0);
-    // };
-    // const calculateTotalAbilNovaValue = () => {
-    //     return abilities.reduce((sum, attr) => sum + attr.novaValue, 0);
-    // };
-    // const calculateTotalBkgrNovaValue = () => {
-    //     return backgrounds.reduce((sum, attr) => sum + attr.novaValue, 0);
-    // };
-
-    // const calculateFreeAttrIncreases = () => {
-    //     const totalNovaValue = calculateTotalAttrNovaValue();
-    //     return (3 - (totalNovaValue % 3)) % 3;
-    // };
-    // const calculateFreeAbilIncreases = () => {
-    //     const totalNovaValue = calculateTotalAbilNovaValue();
-    //     return (6 - (totalNovaValue % 6)) % 6;
-    // };
-    // const calculateFreeBkgrIncreases = () => {
-    //     const totalNovaValue = calculateTotalBkgrNovaValue();
-    //     return (5 - (totalNovaValue % 5)) % 5;
-    // };
-
     const handleAttrIncrement = (index) => {
 
         const attribute = attributes[index];
         const totalValue = attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue;
 
         if (totalValue < 5) {
-            // const freeIncreases = calculateFreeAttrIncreases();
-
-            // if (freeIncreases === 0 && novaPoints < 1) {
-            //     alert('Not enough nova points');
-            //     return;
-            // }
-            if (expPoints < (totalValue * 4)) {
+            if (expPoints - expSpent < (totalValue * 4)) {
                 alert('Not enough experience');
                 return;
             }
             const newAttributes = [...attributes];
             newAttributes[index].expValue += 1;
             setAttributes(newAttributes);
-            setExpPoints(expPoints - (totalValue * 4));
+            setExpSpent(expSpent + (totalValue * 4));
         }
     };
 
@@ -204,13 +119,7 @@ const ExperiencePoints = () => {
         const cost = totalValue === 0 ? 3 : (totalValue * 2);
 
         if (totalValue < 5) {
-            // const freeIncreases = calculateFreeAbilIncreases();
-
-            // if (freeIncreases === 0 && novaPoints < 1) {
-            //     alert('Not enough nova points');
-            //     return;
-            // }
-            if (expPoints < cost) {
+            if (expPoints - expSpent < cost) {
                 alert('Not enough experience');
                 return;
             }
@@ -218,7 +127,7 @@ const ExperiencePoints = () => {
             const index = abilities.indexOf(ability);
             newAbilities[index].expValue += 1;
             setAbilities(newAbilities);
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
         }
     };
 
@@ -230,20 +139,14 @@ const ExperiencePoints = () => {
         const cost = totalValue === 0 ? 2 : (totalValue * 2);
 
         if (totalValue < 5) {
-            // const freeIncreases = calculateFreeBkgrIncreases();
-
-            // if (freeIncreases === 0 && novaPoints < 1) {
-            //     alert('Not enough nova points');
-            //     return;
-            // }
-            if (expPoints < cost) {
+            if (expPoints - expSpent < cost) {
                 alert('Not enough experience');
                 return;
             }
             const newBackgrounds = [...backgrounds];
             newBackgrounds[index].expValue += 1;
             setBackgrounds(newBackgrounds);
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
 
             if (background.name === 'Node' && totalValue > 2) {
                 setTaint(taint + 1);
@@ -253,24 +156,24 @@ const ExperiencePoints = () => {
 
     const handleWillIncrement = () => {
         const totalValue = gameChar.willpowerBonus + gameChar.willpowerNova + gameChar.willpowerExp + 3;
-        if (totalValue < 10 && expPoints >= totalValue) {
+        if (totalValue < 10 && expPoints - expSpent >= totalValue) {
             setGameChar(prevChar => ({
                 ...prevChar,
                 willpowerExp: prevChar.willpowerExp + 1
             }));
-            setExpPoints(expPoints - totalValue);
+            setExpSpent(expSpent + totalValue);
         }
     };
 
     const handleQuantIncrement = () => {
         const totalValue = gameChar.quantumBonus + gameChar.quantumNova + gameChar.quantumExp + 1;
         const cost = expCost(totalValue * 8);
-        if (totalValue < 10 && expPoints >= cost) {
+        if (totalValue < 10 && expPoints - expSpent >= cost) {
             setGameChar(prevChar => ({
                 ...prevChar,
                 quantumExp: prevChar.quantumExp + 1
             }));
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
         }
     };
 
@@ -282,11 +185,11 @@ const ExperiencePoints = () => {
         const totalValue = megaAttribute.value + megaAttribute.expValue;
         const cost = totalValue === 0 ? expCost(6) : expCost(totalValue * 5);
 
-        if (totalValue < maxValue && expPoints >= cost) {
+        if (totalValue < maxValue && expPoints - expSpent >= cost) {
             const newMegaAttributes = [...megaAttributes];
             newMegaAttributes[index].expValue += 1;
             setMegaAttributes(newMegaAttributes);
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
         }
     };
 
@@ -296,59 +199,75 @@ const ExperiencePoints = () => {
         const powerCost = PowerCost(totalValue, power.level);
         const cost = expCost(powerCost);
 
-        if (totalValue < 5 && expPoints >= cost) {
+        if (totalValue < 5 && expPoints - expSpent >= cost) {
             const newPowers = [...powers];
             setPowers(newPowers);
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
         }
     };
 
     const handleInitIncrement = () => {
         const cost = initiative;
-        if (expPoints >= cost) {
+        if (expPoints - expSpent >= cost) {
             setGameChar(prevChar => ({
                 ...prevChar,
                 initiativeExp: prevChar.initiativeExp + 1
             }));
-            setExpPoints(expPoints - cost);
+            setExpSpent(expSpent + cost);
         }
     };
 
     const handleAttrDecrement = (index) => {
         const attribute = attributes[index];
-        const totalValue = attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue - 1;
+        const totalValueBeforeDecrement = attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue;
 
         if (attribute.expValue > 0) {
             const newAttributes = [...attributes];
             newAttributes[index].expValue -= 1;
             setAttributes(newAttributes);
-            setExpPoints(expPoints + totalValue * 4);
+
+            const decrementCost = (totalValueBeforeDecrement - 1) * 4;
+            setExpSpent(expSpent - decrementCost);
         }
     };
 
     const handleAbilDecrement = (attrIndex, abilIndex) => {
         const attrAbilities = abilities.filter(ability => ability.associatedAttribute === attributes[attrIndex].name);
         const ability = attrAbilities[abilIndex];
-        const totalValue = ability.value + ability.bonusValue + ability.novaValue + ability.expValue - 1;
+        const totalValueBeforeDecrement = ability.value + ability.bonusValue + ability.novaValue + ability.expValue;
 
         if (ability.expValue > 0) {
             const newAbilities = [...abilities];
             const index = abilities.indexOf(ability);
             newAbilities[index].expValue -= 1;
             setAbilities(newAbilities);
-            setExpPoints(expPoints + totalValue * 2);
+            
+            let decrementCost;
+            if (totalValueBeforeDecrement === 1) {
+                decrementCost = 3;
+            }   else {
+                decrementCost = (totalValueBeforeDecrement - 1) * 2;
+            }
+            setExpSpent(expSpent - decrementCost);
         }
     };
 
     const handleBkgrDecrement = (index) => {
         const background = backgrounds[index];
-        const totalValue = background.value + background.bonusValue + background.novaValue + background.expValue - 1;
+        const totalValueBeforeDecrement = background.value + background.bonusValue + background.novaValue + background.expValue;
 
         if (background.expValue > 0) {
             const newBackgrounds = [...backgrounds];
             newBackgrounds[index].expValue -= 1;
             setBackgrounds(newBackgrounds);
-            setExpPoints(expPoints + totalValue * 2);
+            
+            let decrementCost;
+            if (totalValueBeforeDecrement === 1) {
+                decrementCost = 2;
+            }   else {
+                decrementCost = (totalValueBeforeDecrement - 1) * 2;
+            }
+            setExpSpent(expSpent - decrementCost);
 
             if (background.name === 'Node' && background.value + background.bonusValue + background.novaValue + background.expValue > 2) {
                 setTaint(taint - 1);
@@ -364,7 +283,7 @@ const ExperiencePoints = () => {
                 ...prevChar,
                 willpowerExp: prevChar.willpowerExp - 1
             }));
-            setExpPoints(expPoints + totalValue);
+            setExpSpent(expSpent - totalValue);
         }
     };
 
@@ -377,7 +296,7 @@ const ExperiencePoints = () => {
                 ...prevChar,
                 quantumExp: prevChar.quantumExp - 1
             }));
-            setExpPoints(expPoints + cost);
+            setExpSpent(expSpent - cost);
         }
     };
 
@@ -385,13 +304,19 @@ const ExperiencePoints = () => {
         const megaAttribute = megaAttributes[index];
 
         const totalValue = megaAttribute.value + megaAttribute.expValue - 1;
-        const cost = expCost(totalValue * 5);
+
+        let cost;
+        if (totalValue === 0) {
+            cost = 6;
+        }   else {
+            cost = expCost(totalValue * 5);
+        }
 
         if (megaAttribute.expValue > 0) {
             const newMegaAttributes = [...megaAttributes];
             newMegaAttributes[index].expValue -= 1;
             setMegaAttributes(newMegaAttributes);
-            setExpPoints(expPoints + cost);
+            setExpSpent(expSpent - cost);
         }
     };
 
@@ -405,7 +330,7 @@ const ExperiencePoints = () => {
             const newPowers = [...powers];
             newPowers[index].expValue -= 1;
             setPowers(newPowers);
-            setExpPoints(expPoints + cost);
+            setExpSpent(expSpent - cost);
         }
     };
 
@@ -417,7 +342,7 @@ const ExperiencePoints = () => {
                 ...prevChar,
                 initiativeExp: prevChar.initiativeExp - 1
             }));
-            setExpPoints(expPoints + cost);
+            setExpSpent(expSpent - cost);
         }
     };
 
@@ -430,7 +355,7 @@ const ExperiencePoints = () => {
                         ability.id === selectedAbilityId ? { ...ability, specialties: [...ability.specialties, response.data] } : ability
                     )
                 );
-                setExpPoints(expPoints - 1);
+                setExpSpent(expSpent + 1);
                 handleSpecialtyModalClose();
             } catch (error) {
                 console.error('Error adding specialty:', error);
@@ -520,35 +445,11 @@ const ExperiencePoints = () => {
                     ability.id === abilityId ? { ...ability, specialties: ability.specialties.filter(specialty => specialty.id !== specialtyId) } : ability
                 )
             );
-            setExpPoints(expPoints + 1);
+            setExpSpent(expSpent - 1);
         } catch (error) {
             console.error('Error deleting specialty:', error);
         }
     };
-
-    // const handleFlawDelete = async (flawId, flawValue) => {
-    //     try {
-    //         await axios.delete(`http://localhost:8080/api/flawsAndMerits/${flawId}/flaw`);
-    //         setFlaws((prevFlaws) =>
-    //             prevFlaws.filter((flaw) => flaw.id !== flawId)
-    //         );
-    //         setBonusPoints(bonusPoints - parseInt(flawValue, 10));
-    //     } catch (error) {
-    //         console.error('Error deleting flaw:', error);
-    //     }
-    // };
-
-    // const handleMeritDelete = async (meritId, meritValue) => {
-    //     try {
-    //         await axios.delete(`http://localhost:8080/api/flawsAndMerits/${meritId}/merit`);
-    //         setMerits((prevMerits) =>
-    //             prevMerits.filter((merit) => merit.id !== meritId)
-    //         );
-    //         setBonusPoints(bonusPoints + parseInt(meritValue, 10));
-    //     } catch (error) {
-    //         console.error('Error deleting merit:', error);
-    //     }
-    // };
 
     return (
         <Container fluid>
@@ -566,13 +467,18 @@ const ExperiencePoints = () => {
                     </Row>
                     <Row className="align-items-center py-2">
                         <Col>
-                            <h3 className="text-center">Experience Points to spend: {freeExp}</h3>
+                            <h3 className="text-center">
+                                <ExpToSpendDisplay 
+                                expPoints={expPoints}
+                                expSpent={expSpent}
+                                />
+                            </h3>
                         </Col>
                     </Row>
                 </Container>
             </header>
             {/* Main Content */}
-            <main style={{ paddingTop: '120px' }}>
+            <main style={{ paddingTop: '125px' }}>
                 <form onSubmit={handleSubmit}>
                     {/* Attributes and Abilities Section */}
                     <section className="attribute-section mb-5">
@@ -623,7 +529,7 @@ const ExperiencePoints = () => {
                                                             </div>
                                                             <div className='col-md-6 text-start'>
                                                                 <span className='me-2'>
-                                                                    <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue} />
+                                                                    <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + ability.expValue} />
                                                                 </span>
                                                                 <ButtonGroup className='border rounded shadow'>
                                                                     <Button variant="light" size='sm' onClick={() => handleAbilDecrement(attrIndex, abilIndex)}>
@@ -640,7 +546,7 @@ const ExperiencePoints = () => {
                                                                 {ability.specialties.map((specialty, specIndex) => (
                                                                     <li key={specIndex} className='list-group-item'>
                                                                         <div>
-                                                                            <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + 1} max={6} /></span>
+                                                                            <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + ability.expValue + 1} max={6} /></span>
                                                                             <Button
                                                                                 className='ms-2'
                                                                                 variant="danger"
@@ -678,7 +584,7 @@ const ExperiencePoints = () => {
                                         </div>
                                         <div className='col-md-6 text-start'>
                                             <span className='me-2'>
-                                                <SymbolDisplay value={background.value + background.bonusValue + background.novaValue} />
+                                                <SymbolDisplay value={background.value + background.bonusValue + background.novaValue + background.expValue} />
                                             </span>
                                             <ButtonGroup className='border rounded shadow'>
                                                 <Button variant="light" size='sm' onClick={() => handleBkgrDecrement(bkgrIndex)}>
@@ -705,7 +611,7 @@ const ExperiencePoints = () => {
                                     </div>
                                     <div className='col-md-6 text-start'>
                                         <span className='me-2'>
-                                            <SymbolDisplay value={gameChar.willpowerBonus + gameChar.willpowerNova + 3} max={10} />
+                                            <SymbolDisplay value={gameChar.willpowerBonus + gameChar.willpowerNova + gameChar.willpowerExp + 3} max={10} />
                                         </span>
                                         <ButtonGroup className='border rounded shadow'>
                                             <Button variant="light" size='sm' onClick={handleWillDecrement}>
@@ -725,7 +631,7 @@ const ExperiencePoints = () => {
                                     </div>
                                     <div className='col-md-6 text-start'>
                                         <span className='me-2'>
-                                            <SymbolDisplay value={gameChar.quantumBonus + gameChar.quantumNova + 1} max={10} />
+                                            <SymbolDisplay value={gameChar.quantumBonus + gameChar.quantumNova + gameChar.quantumExp + 1} max={10} />
                                         </span>
                                         <ButtonGroup className='border rounded shadow'>
                                             <Button variant="light" size='sm' onClick={handleQuantDecrement}>
@@ -775,7 +681,7 @@ const ExperiencePoints = () => {
                                     <Row>
                                         <Col className="text-center">
                                             <div className="btn-toolbar justify-content-center" role="toolbar">
-                                                <h4 className='me-2'><SymbolDisplay value={megaAttribute.value} /></h4>
+                                                <h4 className='me-2'><SymbolDisplay value={megaAttribute.value + megaAttribute.expValue} /></h4>
                                                 <ButtonGroup className='border rounded shadow'>
                                                     <Button variant="light" onClick={() => handleMegaAttrDecrement(megaIndex)}>
                                                         <i className="bi bi-dash-square"></i>
@@ -789,11 +695,12 @@ const ExperiencePoints = () => {
                                     </Row>
                                     <Row>
                                         <Col className="text-center">
-                                            {megaAttribute.value > 0 && (
+                                            {megaAttribute.value + megaAttribute.expValue > 0 && (
                                                 <EnhancementManager
                                                     megaAttributeId={megaAttribute.id}
                                                     expPoints={expPoints}
-                                                    setExpPoints={setExpPoints}
+                                                    expSpent={expSpent}
+                                                    setExpSpent={setExpSpent}
                                                     tainted={tainted}
                                                 />
 
@@ -818,7 +725,7 @@ const ExperiencePoints = () => {
                                     <Row>
                                         <Col>
                                             <div className="btn-toolbar justify-content-center" role="toolbar">
-                                                <h4 className='me-2'><SymbolDisplay value={power.value} /></h4>
+                                                <h4 className='me-2'><SymbolDisplay value={power.value + power.expValue} /></h4>
                                                 <ButtonGroup className='border rounded shadow'>
                                                     <Button variant="light" onClick={() => handlePowerDecrement(powIndex)}>
                                                         <i className="bi bi-dash-square"></i>
@@ -837,7 +744,7 @@ const ExperiencePoints = () => {
                                         <Col><b>Quantum Minimum:</b> {power.quantumMinimum}</Col>
                                     </Row>
                                     <Row>
-                                        <Col><b>Dice Pool:</b> {power.attrName} + {power.name} ({power.attrValue + power.value})</Col>
+                                        <Col><b>Dice Pool:</b> {power.attrName} + {power.name} ({power.attrValue + power.value + power.expValue})</Col>
                                     </Row>
                                     {power.hasExtra && (
                                         <Row>
@@ -852,105 +759,12 @@ const ExperiencePoints = () => {
                             powers={powers}
                             setPowers={setPowers}
                             expPoints={expPoints}
-                            setExpPoints={setExpPoints}
+                            expSpent={expSpent}
+                            setExpSpent={setExpSpent}
                             id={id}
                             tainted={tainted}
                         />
                     </section>
-
-                    {/* Flaws Section */}
-                    {/* <section className='flaws-section my-4'>
-                        <h3>Flaws</h3>
-                        <ListGroup className='mb-3'>
-                            {flaws.map((flaw, index) => (
-                                <ListGroup.Item key={index}>
-                                    {flaw.name} <span className='badge bg-warning'>{flaw.value}</span>
-                                    <Button
-                                        className='ms-2'
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleFlawDelete(flaw.id, flaw.value)}
-                                    >
-                                        x
-                                    </Button>
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
-                        <Form>
-                            <Row>
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        placeholder="Flaw Name"
-                                        value={newFlaw.name}
-                                        onChange={handleFlawChange}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form.Control
-                                        type="number"
-                                        name="value"
-                                        placeholder="Value"
-                                        value={newFlaw.value}
-                                        onChange={handleFlawChange}
-                                        min={1}
-                                        max={7}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button variant="primary" onClick={handleAddFlaw}>Add Flaw</Button>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </section> */}
-
-                    {/* Merits Section */}
-                    {/* <section className='merits-section my-4'>
-                        <h3>Merits</h3>
-                        <ListGroup className='mb-3'>
-                            {merits.map((merit, index) => (
-                                <ListGroup.Item key={index}>
-                                    {merit.name} <span className='badge bg-primary'>{merit.value}</span>
-                                    <Button
-                                        className='ms-2'
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleMeritDelete(merit.id, merit.value)}
-                                    >
-                                        x
-                                    </Button>
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
-                        <Form>
-                            <Row>
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        name="name"
-                                        placeholder="Merit Name"
-                                        value={newMerit.name}
-                                        onChange={handleMeritChange}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form.Control
-                                        type="number"
-                                        name="value"
-                                        placeholder="Value"
-                                        value={newMerit.value}
-                                        onChange={handleMeritChange}
-                                        min={1}
-                                        max={7}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Button variant="primary" onClick={handleAddMerit}>Add Merit</Button>
-                                </Col>
-                            </Row>
-                        </Form>
-                    </section> */}
 
                     {/* Submit and Cancel Buttons */}
                     <div className="d-flex justify-content-center my-4">
@@ -1062,7 +876,7 @@ const QualityManager = ({ attributeId }) => {
 
 
 
-const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted }) => {
+const EnhancementManager = ({ megaAttributeId, expPoints, expSpent, setExpSpent, tainted }) => {
     // State to hold the quality name entered by the user
     const [enhancementName, setEnhancementName] = useState('');
     // State to hold the existing quality name (if any) for placeholder
@@ -1099,7 +913,7 @@ const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted 
     const saveEnhancement = async () => {
         const enhancementCost = existingEnhancements.length > 0 ? expCost(5) : 0;
 
-        if (expPoints < enhancementCost) {
+        if (expPoints - expSpent < enhancementCost) {
             alert('Not enough experience points');
             return;
         }
@@ -1109,7 +923,7 @@ const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted 
             setExistingEnhancements([...existingEnhancements, { name: enhancementName }]);
             setEnhancementName(''); // Clear the input field
             if (enhancementCost > 0) {
-                setExpPoints(expPoints - enhancementCost);
+                setExpSpent(expSpent + enhancementCost);
             }
         } catch (error) {
             console.error('Error saving enhancement:', error);
@@ -1122,7 +936,7 @@ const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted 
         try {
             const response = await axios.delete(`http://localhost:8080/api/megaAttributes/${megaAttributeId}/enhancements/${enhancementId}`);
             if (enhancementCostReturn > 0) {
-                setExpPoints(expPoints + enhancementCostReturn);
+                setExpSpent(expSpent - enhancementCostReturn);
             }
             fetchEnhancements();
         } catch (error) {
@@ -1165,7 +979,7 @@ const EnhancementManager = ({ megaAttributeId, expPoints, setExpPoints, tainted 
 
 
 
-const NewPowerManager = ({ attributes, powers, setPowers, expPoints, setExpPoints, id, tainted }) => {
+const NewPowerManager = ({ attributes, powers, setPowers, expPoints, expSpent, setExpSpent, id, tainted }) => {
 
     const [newPower, setNewPower] = useState({
         name: "",
@@ -1212,19 +1026,19 @@ const NewPowerManager = ({ attributes, powers, setPowers, expPoints, setExpPoint
         const powerCost = Number(PowerCost(0, Number(newPower.level) + Number(newPower.hasExtra)));
         const cost = expCost(powerCost);
 
-        if (isNaN(expPoints)) {
+        if (isNaN(expPoints - expSpent)) {
             console.error('Invalid expPoints value:', expPoints);
             return;
         }
 
-        if (expPoints < cost) {
+        if (expPoints - expSpent < cost) {
             alert('Not enough experience points');
             return;
         }
 
-        setExpPoints(prev => {
-            const newPoints = Number(prev) - Number(cost);
-            return newPoints >= 0 ? newPoints : 0;  // Ensure it doesn't go below zero
+        setExpSpent(prev => {
+            const newPoints = Number(prev) + Number(cost);
+            return newPoints;
         });
 
         try {
@@ -1407,4 +1221,31 @@ const PowerCost = ({ currentRating, powerLevel }) => {
         default:
             return 0;
     }
+};
+
+
+
+const ExpToSpendDisplay = ({ expPoints, expSpent }) => {
+    const filledSymbol = '⍉';
+    const emptySymbol = '⭘';
+    
+    const symbols = [];
+  
+    for (let i = 0; i < expPoints; i++) {
+      symbols.push(i < expSpent ? filledSymbol : emptySymbol);
+    }
+
+    return (
+        <div style={{ textAlignLast: 'justify', textAlign: 'justify' }}>
+            {symbols.map((symbol, index) => (
+                <React.Fragment key={index}>
+                    <span>{symbol}</span>
+                    {(index + 1) % 5 === 0 && index !== expPoints - 1 && (
+                        <span >|</span>
+                    )}
+                </React.Fragment>
+            ))}
+        </div>
+    );
+
 };

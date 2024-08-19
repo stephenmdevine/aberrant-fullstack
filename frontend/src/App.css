@@ -52,3 +52,33 @@
 .gray-color {
     color: #9c9c9c;
 }
+
+.exp-display {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.symbol, .separator {
+  margin-right: 0.5rem; /* Adjust spacing between symbols and separators */
+}
+
+.symbol {
+  min-width: 1rem; /* Ensure consistent spacing */
+}
+
+.separator {
+  margin-right: 1rem; /* Add extra space after a group of 5 symbols */
+}
+
+@media (max-width: 768px) {
+  .exp-display {
+      justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .exp-display {
+      justify-content: space-around;
+  }
+}
