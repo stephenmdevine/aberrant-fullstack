@@ -75,7 +75,7 @@ const ExperiencePoints = () => {
 
     //   // Ability specialty modal
     const handleSpecialtyModalShow = (abilityId) => {
-        if (bonusPoints > 0) {
+        if (expPoints > 0) {
             setSelectedAbilityId(abilityId);
             setShowSpecialtyModal(true);
         } else {
@@ -196,11 +196,13 @@ const ExperiencePoints = () => {
     const handlePowerIncrement = (index) => {
         const power = powers[index];
         const totalValue = power.value + power.expValue;
-        const powerCost = PowerCost(totalValue, power.level);
+        const powerCost = PowerCost(totalValue, power.level + (power.hasExtra ? 1 : 0));
         const cost = expCost(powerCost);
 
         if (totalValue < 5 && expPoints - expSpent >= cost) {
             const newPowers = [...powers];
+            const updatedPower = { ...newPowers[index], expValue: power.expValue + 1 };
+            newPowers[index] = updatedPower;
             setPowers(newPowers);
             setExpSpent(expSpent + cost);
         }
@@ -241,11 +243,11 @@ const ExperiencePoints = () => {
             const index = abilities.indexOf(ability);
             newAbilities[index].expValue -= 1;
             setAbilities(newAbilities);
-            
+
             let decrementCost;
             if (totalValueBeforeDecrement === 1) {
                 decrementCost = 3;
-            }   else {
+            } else {
                 decrementCost = (totalValueBeforeDecrement - 1) * 2;
             }
             setExpSpent(expSpent - decrementCost);
@@ -260,11 +262,11 @@ const ExperiencePoints = () => {
             const newBackgrounds = [...backgrounds];
             newBackgrounds[index].expValue -= 1;
             setBackgrounds(newBackgrounds);
-            
+
             let decrementCost;
             if (totalValueBeforeDecrement === 1) {
                 decrementCost = 2;
-            }   else {
+            } else {
                 decrementCost = (totalValueBeforeDecrement - 1) * 2;
             }
             setExpSpent(expSpent - decrementCost);
@@ -308,7 +310,7 @@ const ExperiencePoints = () => {
         let cost;
         if (totalValue === 0) {
             cost = 6;
-        }   else {
+        } else {
             cost = expCost(totalValue * 5);
         }
 
@@ -323,12 +325,13 @@ const ExperiencePoints = () => {
     const handlePowerDecrement = (index) => {
         const power = powers[index];
         const totalValue = power.value + power.expValue - 1;
-        const powerCost = PowerCost(totalValue, power.level);
+        const powerCost = PowerCost(totalValue, power.level + Number(power.hasExtra));
         const cost = expCost(powerCost);
 
         if (power.expValue > 0) {
             const newPowers = [...powers];
-            newPowers[index].expValue -= 1;
+            const updatedPower = { ...newPowers[index], expValue: power.expValue - 1 };
+            newPowers[index] = updatedPower;
             setPowers(newPowers);
             setExpSpent(expSpent - cost);
         }
@@ -451,6 +454,20 @@ const ExperiencePoints = () => {
         }
     };
 
+    const handlePowerDelete = async (index) => {
+        const powerId = powers[index].id;
+    
+        try {
+            await axios.delete(`http://localhost:8080/api/powers/${powerId}`);
+            const updatedPowers = powers.filter((_, i) => i !== index);
+            setPowers(updatedPowers);
+            alert('Power deleted successfully.');
+        } catch (error) {
+            console.error('Error deleting power:', error);
+            alert('Failed to delete power.');
+        }
+    };
+
     return (
         <Container fluid>
             {/* Fixed Navbar and Header */}
@@ -467,10 +484,14 @@ const ExperiencePoints = () => {
                     </Row>
                     <Row className="align-items-center py-2">
                         <Col>
-                            <h3 className="text-center">
-                                <ExpToSpendDisplay 
-                                expPoints={expPoints}
-                                expSpent={expSpent}
+                            <h3 className="d-flex justify-content-center align-items-center">
+                                <ExpToSpendDisplay
+                                    expPoints={expPoints}
+                                    expSpent={expSpent}
+                                />
+                                <AddExpPointsButton
+                                    expPoints={expPoints}
+                                    setExpPoints={setExpPoints}
                                 />
                             </h3>
                         </Col>
@@ -506,7 +527,7 @@ const ExperiencePoints = () => {
                                                 </ButtonGroup>
                                                 <h4 className='ps-2 pt-1'>{
                                                     (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) < 5 ?
-                                                (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) * 4 : ""
+                                                        (attribute.value + attribute.bonusValue + attribute.novaValue + attribute.expValue) * 4 : ""
                                                 }</h4>
                                             </div>
                                         </Col>
@@ -531,7 +552,7 @@ const ExperiencePoints = () => {
                                                                 <span className='me-2'>
                                                                     <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + ability.expValue} />
                                                                 </span>
-                                                                <ButtonGroup className='border rounded shadow'>
+                                                                <ButtonGroup className='border rounded shadow mb-2'>
                                                                     <Button variant="light" size='sm' onClick={() => handleAbilDecrement(attrIndex, abilIndex)}>
                                                                         <i className="bi bi-dash-square"></i>
                                                                     </Button>
@@ -545,22 +566,28 @@ const ExperiencePoints = () => {
                                                             <ul className='list-group'>
                                                                 {ability.specialties.map((specialty, specIndex) => (
                                                                     <li key={specIndex} className='list-group-item'>
-                                                                        <div>
-                                                                            <span>{specialty.name} <SymbolDisplay value={ability.value + ability.bonusValue + ability.novaValue + ability.expValue + 1} max={6} /></span>
-                                                                            <Button
-                                                                                className='ms-2'
-                                                                                variant="danger"
-                                                                                size="sm"
+                                                                        <div className='d-flex justify-content-center align-items-center mt-1'>
+                                                                            <span>{specialty.name} <SymbolDisplay
+                                                                                value={ability.value + ability.bonusValue + ability.novaValue + ability.expValue + 1} max={6}
+                                                                            /></span>
+                                                                            <button
+                                                                                type='button'
+                                                                                className=' btn-close border border-danger ms-2'
+                                                                                aria-label='Close'
+                                                                                title='Delete'
                                                                                 onClick={() => handleSpecialtyDelete(specialty.id, ability.id)}
-                                                                            >
-                                                                                x
-                                                                            </Button>
+                                                                            ></button>
                                                                         </div>
                                                                     </li>
                                                                 ))}
                                                             </ul>
                                                             {ability.specialties.length < 3 && (
-                                                                <Button variant="primary" size="sm" onClick={() => handleSpecialtyModalShow(ability.id)}>Add Specialty</Button>
+                                                                <Button
+                                                                    variant="primary"
+                                                                    size="sm"
+                                                                    className='mt-2'
+                                                                    onClick={() => handleSpecialtyModalShow(ability.id)}
+                                                                >Add Specialty</Button>
                                                             )}
                                                         </div>
                                                     </li>
@@ -720,11 +747,28 @@ const ExperiencePoints = () => {
                             return (
                                 <Container key={power.name} className='my-4 py-2 border rounded col-md-6'>
                                     <Row>
-                                        <h4>{power.name}</h4>
+                                        <div className='row'>
+                                            <div className='col-md-1'>
+                                                {powIndex}
+                                            </div>
+                                            <div className='col-md-10'>
+                                                <h4>{power.name}</h4>
+
+                                            </div>
+                                            <div className='col-md-1'>
+                                                <button
+                                                    type='button'
+                                                    className=' btn-close border border-danger ms-4'
+                                                    aria-label='Close'
+                                                    title='Delete'
+                                                onClick={() => handlePowerDelete(powIndex)}
+                                                ></button>
+                                            </div>
+                                        </div>
                                     </Row>
                                     <Row>
                                         <Col>
-                                            <div className="btn-toolbar justify-content-center" role="toolbar">
+                                            <div className="btn-toolbar d-flex justify-content-center" role="toolbar">
                                                 <h4 className='me-2'><SymbolDisplay value={power.value + power.expValue} /></h4>
                                                 <ButtonGroup className='border rounded shadow'>
                                                     <Button variant="light" onClick={() => handlePowerDecrement(powIndex)}>
@@ -948,16 +992,15 @@ const EnhancementManager = ({ megaAttributeId, expPoints, expSpent, setExpSpent,
         <div className='py-2'>
             <div className='m-2'>
                 {existingEnhancements.map((enhancement, index) => (
-                    <div className='p-1' key={index}>
-                        <span>{enhancement.name}</span>
-                        <Button
-                            className='ms-2'
-                            variant="danger"
-                            size="sm"
+                    <div className='d-flex justify-content-center align-items-center' key={index}>
+                        <h6 className='pt-1'>{enhancement.name}</h6>
+                        <button
+                            type='button'
+                            className=' btn-close border border-danger ms-2'
+                            aria-label='Close'
+                            title='Delete'
                             onClick={() => handleDeleteEnhancement(megaAttributeId, enhancement.id)}
-                        >
-                            x
-                        </Button>
+                        ></button>
                     </div>
                 ))}
             </div>
@@ -983,8 +1026,8 @@ const NewPowerManager = ({ attributes, powers, setPowers, expPoints, expSpent, s
 
     const [newPower, setNewPower] = useState({
         name: "",
-        value: 1,
-        expValue: 0,
+        value: 0,
+        expValue: 1,
         level: 1,
         quantumMinimum: 1,
         hasExtra: false,
@@ -1002,7 +1045,7 @@ const NewPowerManager = ({ attributes, powers, setPowers, expPoints, expSpent, s
 
     const handlePowerInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        const parsedValue = type === 'checkbox' ? checked : (name === 'level' || name === 'quantumMinimum') ? Number(value) : value;    
+        const parsedValue = type === 'checkbox' ? checked : (name === 'level' || name === 'quantumMinimum') ? Number(value) : value;
 
         if (name === 'level' && parsedValue === 6) {
             setNewPower({
@@ -1052,8 +1095,8 @@ const NewPowerManager = ({ attributes, powers, setPowers, expPoints, expSpent, s
 
         setNewPower({
             name: "",
-            value: 1,
-            expValue: 0,
+            value: 0,
+            expValue: 1,
             level: 1,
             quantumMinimum: 1,
             hasExtra: false,
@@ -1125,7 +1168,6 @@ const NewPowerManager = ({ attributes, powers, setPowers, expPoints, expSpent, s
                         onChange={handlePowerInputChange}
                         className='form-select'
                     >
-                        <option value={null}>No Attribute</option>
                         {attributes.map(attr => (
                             <option key={attr.id} value={attr.id}>
                                 {attr.name}
@@ -1201,7 +1243,7 @@ const TaintedButton = ({ tainted, setTainted }) => {
 
 
 
-const PowerCost = ({ currentRating, powerLevel }) => {
+const PowerCost = (currentRating, powerLevel) => {
     if (currentRating === 0) {
         return powerLevel * 3;
     }
@@ -1228,11 +1270,11 @@ const PowerCost = ({ currentRating, powerLevel }) => {
 const ExpToSpendDisplay = ({ expPoints, expSpent }) => {
     const filledSymbol = '⍉';
     const emptySymbol = '⭘';
-    
+
     const symbols = [];
-  
+
     for (let i = 0; i < expPoints; i++) {
-      symbols.push(i < expSpent ? filledSymbol : emptySymbol);
+        symbols.push(i < expSpent ? filledSymbol : emptySymbol);
     }
 
     return (
@@ -1248,4 +1290,53 @@ const ExpToSpendDisplay = ({ expPoints, expSpent }) => {
         </div>
     );
 
+};
+
+
+
+const AddExpPointsButton = ({ expPoints, setExpPoints }) => {
+    const [show, setShow] = useState(false);
+    const [newExp, setNewExp] = useState(0);
+
+    const handleShow = () => setShow(true);
+    const handleClose = () => setShow(false);
+
+    const handleAddExpPoints = () => {
+        const parsedExp = parseInt(newExp, 10);
+        if (!isNaN(parsedExp) && parsedExp > 0) {
+            setExpPoints(expPoints + parsedExp);
+        }
+        handleClose();
+    };
+
+    return (
+        <>
+            <Button variant="success" onClick={handleShow}>
+                Add Experience Points
+            </Button>
+
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add Experience Points</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <input
+                        type="number"
+                        className="form-control"
+                        placeholder="Enter amount"
+                        value={newExp}
+                        onChange={(e) => setNewExp(e.target.value)}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleAddExpPoints}>
+                        Add
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
+    );
 };
